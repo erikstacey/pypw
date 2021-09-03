@@ -110,12 +110,11 @@ class Periodogram():
             pl.savefig(savename)
 
 
-    def diagnostic_self_plot(self, show=False, savename = None):
-        peakx, peaky = self.smart_peak_select()
+    def diagnostic_self_plot(self, vline = None, show=False, savename = None):
         pl.plot(self.lsfreq, self.lsamp, color='black')
         pl.xlim(0, 2)
-        pl.axvline(peakx,color='red')
-        print(peakx, peaky)
+        if vline is not None:
+            pl.axvline(vline,color='red')
         if show:
             pl.show()
         elif savename:

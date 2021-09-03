@@ -27,6 +27,7 @@ Alternative : erikwstacey@gmail.com
 
 import os
 import sys
+import shutil
 import config
 import numpy as np
 from preprocessing import preprocess
@@ -63,6 +64,9 @@ def gen_flists_from_objlist_full(freqs):
 def main():
     save_config("configlog.txt")
     os.chdir(config.working_dir)
+    for folder in ["figures", "figures_lcs_iterative", "figures_periodograms_iterative", "freq_logs"]:
+        shutil.rmtree(folder, ignore_errors=True)
+        os.makedirs(folder)
     imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True)
     pptime, ppdata, pperr = preprocess(imptime, impdata, imperr)
     pl.plot(pptime, ppdata)
@@ -73,8 +77,6 @@ def main():
     mf_model = np.zeros(len(LC0.time), dtype=float)
     res = 1.5/(max(LC0.time)-min(LC0.time))
     print(f"Performing analysis assuming frequency resolution of {res:.3f}")
-    if config.save_freq_logs:
-        os.makedirs(config.working_dir+"/"+config.freqlog_folder, exist_ok=True)
 
     if not config.quiet:
         print("Starting iterations")
@@ -100,11 +102,15 @@ def main():
             else:
                 c_p_guess += 0.4
         sf_model = sin_model(LC0.time, sf_f, sf_a, sf_p)
+
+        #plot the SF model, and the periodogram
         if config.plot_iterative_lcs:
             pl.plot(LCs[-1].time, LCs[-1].data, linestyle='none', marker='.', markersize=1, color="black")
             pl.plot(LCs[-1].time, sin_model(LCs[-1].time, sf_f, sf_a, sf_p), color='red')
             pl.savefig(f"figures_lcs_iterative/sf_model_{i}.png")
             pl.clf()
+        if config.plot_iterative_pgs:
+            LCs[-1].periodogram.diagnostic_self_plot(vline = cpg_f, savename=f"figures_periodograms_iterative/{i}.png")
         freqs = np.append(freqs, Freq(sf_f, sf_a, sf_p, n=i))
         freqs[-1].prettyprint()
         ##### Stage 2: unpack frequencies from list of objects to freq, amp, phase arrays
@@ -114,6 +120,7 @@ def main():
             ct0 = time.time()
         mf_freqs0, mf_amps0, mf_phases0 = gen_flists_from_objlist(freqs)
         ##### Stage 3: multi-frequency optimization
+        # TODO: Figure out why this takes so long at high numbers of parameters (>20) compared to scipy
         if not config.quiet:
             print(f"\tStage 2 complete in {time.time()-ct0}")
             print("\tStarting stage 3 - multi-frequency fit")
@@ -142,7 +149,11 @@ def main():
         mf_model[:] = 0
         for freq in freqs:
             mf_model += freq.genmodel(LC0.time)
-
+        if config.plot_iterative_lcs:
+            pl.plot(LCs[-1].time, LCs[-1].data, linestyle='none', marker='.', markersize=1, color="black")
+            pl.plot(LCs[-1].time, mf_model, color='red')
+            pl.savefig(f"figures_lcs_iterative/mf_model_{i}.png")
+            pl.clf()
         ##### Stage 6: Create and store residual light curve
         if not config.quiet:
             print(f"\tStage 5 complete in {time.time()-ct0}")
@@ -155,8 +166,7 @@ def main():
             r_lc = Lightcurve(LC0.time, LCs[0].data - mf_model, LC0.err)
         if config.plot_iterative_lcs:
             r_lc.diag_plot(show=False, savename=f"figures_lcs_iterative/residual_{i}.png")
-        if config.plot_iterative_pgs:
-            r_lc.periodogram.diagnostic_self_plot(savename=f"figures_periodograms_iterative/{i}.png")
+
         LCs = np.append(LCs, r_lc)
         if not config.quiet:
             print(f"\tStage 6 complete in {time.time()-ct0}")
@@ -172,10 +182,16 @@ def main():
         if not config.quiet:
             print("\n\n")
     # post events
+    # PLOTS
     final_pg = LCs[-1].periodogram
     final_pg.fit_self_lopoly()
-    final_pg.plot_polyfit_log()
-    final_pg.plot_polyfit_normspace()
+    final_pg.plot_polyfit_log(savename="figures/residual_pg_fit_poly_log.png")
+    final_pg.plot_polyfit_normspace(savename="figures/residual_pg_fit_poly_log.png")
+    pl.plot(LCs[-1].time, LCs[-1].data, linestyle='none', marker='.', markersize=1, color="black")
+    pl.savefig("figures/residual_lc.png")
+    pl.clf()
+    LCs[-1].periodogram.diagnostic_self_plot(savename="figures/residual_pg.png")
+
     for freq in freqs:
         freq.sig = freq.amp / final_pg.get_polyfit_at_val(freq.freq)
         freq.prettyprint_sig()
