@@ -134,7 +134,6 @@ def main():
         for k in range(len(fit_freqs)):
             freqs[k].update(fit_freqs[k], fit_amps[k], fit_phases[k])
         #### Stage 5: (re)generate current model
-        # TODO: try subtracting off single-frequency models from residuals and see if that helps
         if not config.quiet:
             print(f"\tStage 4 complete in {time.time()-ct0}")
             print("\tStarting stage 5 - making current model")
@@ -149,6 +148,7 @@ def main():
             print(f"\tStage 5 complete in {time.time()-ct0}")
             print("\tStarting stage 6 - making and storing residual LC")
             ct0 = time.time()
+
         if config.residual_model_generation == "sf":
             r_lc = Lightcurve(LC0.time, LCs[-1].data-sf_model, LC0.err)
         elif config.residual_model_generation == "mf":

@@ -28,12 +28,14 @@ def fit_multi_lmfit(x, y, err, f0, a0, p0):
     out_a = np.zeros(len(f0))
     out_p = np.zeros(len(f0))
     for key in min_pardict.keys():
+        if abs(min_pardict[key]-min_pardict[key].min) < min_pardict[key].min*0.05 or abs(min_pardict[key]-min_pardict[key].max) < min_pardict[key].max*0.05:
+            print(f"\t\t{key} ({min_pardict[key].value} within 5% of bounds ({fit_p[key].min}, {fit_p[key].max})")
         if key[0] == "f":
-            out_f[int(key[1:])] = min_pardict[key]
+            out_f[int(key[1:])] = min_pardict[key].value
         elif key[0] == "a":
-            out_a[int(key[1:])] = min_pardict[key]
+            out_a[int(key[1:])] = min_pardict[key].value
         elif key[0] == "p":
-            out_p[int(key[1:])] = min_pardict[key]
+            out_p[int(key[1:])] = min_pardict[key].value
     return out_f, out_a, out_p
 
 
