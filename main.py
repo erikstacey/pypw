@@ -38,6 +38,7 @@ from pw_io import save_csv_flist, save_config
 from models import sin_model
 
 from optimization import fit_multi_lm, fit_single_lm, fit_multi_annealing
+from optimization_lm import fit_multi_lmfit
 
 def gen_flists_from_objlist(freqs):
     """Takes list of frequency objects (Freq.py) and converts it to a list of frequency, amplitude, and phase vals"""
@@ -118,11 +119,13 @@ def main():
             print("\tStarting stage 3 - multi-frequency fit")
             ct0 = time.time()
         if config.multi_fit_type=="lm":
-            fit_multi_fn = fit_multi_lm
+            fit_multi_fn = fit_multi_lmfit
         elif config.multi_fit_type=="anneal":
             fit_multi_fn = fit_multi_annealing
+        elif config.multi_fit_type == "scipy":
+            fit_multi_fn = fit_multi_lm
         fit_freqs, fit_amps, fit_phases = fit_multi_fn(x=LC0.time, y=LC0.data, err=LC0.err, f0=mf_freqs0,
-                                                            a0=mf_amps0, p0=mf_phases0, nolocalflag=False)
+                                                            a0=mf_amps0, p0=mf_phases0)
         ##### Stage 4: update frequency objects
         if not config.quiet:
             print(f"\tStage 3 complete in {time.time()-ct0}")

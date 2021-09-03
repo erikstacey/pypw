@@ -12,7 +12,7 @@ def min_n_sin_model(params, x, data, err):
         model += sin_model(x, params[f"f{i}"], params[f"a{i}"], params[f"p{i}"])
     return (model-data) / err
 
-def fit_multi_lmfit(x, data, err, f0, a0, p0):
+def fit_multi_lmfit(x, y, err, f0, a0, p0):
     fit_p = lm.Parameters()
     for i in range(len(f0)):
         fit_p.add(f"f{i}", value = f0[i],
@@ -21,7 +21,7 @@ def fit_multi_lmfit(x, data, err, f0, a0, p0):
                   min=config.lm_amp_bounds_lower_coef*a0[i], max = config.lm_amp_bounds_upper_coef*a0[i])
         fit_p.add(f"p{i}", value = p0[i],
                   min=config.lm_phase_bounds_lower, max = config.lm_phase_bounds_upper)
-    minner = lm.Minimizer(min_n_sin_model, fit_p, fcn_args=(x, data, err))
+    minner = lm.Minimizer(min_n_sin_model, fit_p, fcn_args=(x, y, err))
     min_res = minner.minimize()
     min_pardict = min_res.params
     out_f = np.zeros(len(f0))
@@ -29,11 +29,11 @@ def fit_multi_lmfit(x, data, err, f0, a0, p0):
     out_p = np.zeros(len(f0))
     for key in min_pardict.keys():
         if key[0] == "f":
-            out_f[int(key[1])] = min_pardict[key]
+            out_f[int(key[1:])] = min_pardict[key]
         elif key[0] == "a":
-            out_a[int(key[1])] = min_pardict[key]
+            out_a[int(key[1:])] = min_pardict[key]
         elif key[0] == "p":
-            out_p[int(key[1])] = min_pardict[key]
+            out_p[int(key[1:])] = min_pardict[key]
     return out_f, out_a, out_p
 
 

@@ -60,7 +60,7 @@ def fit_multi_lm(x, y, err, f0, a0, p0, nolocalflag=None):
     freqs, amps, phases = unpack_paramlist(p)
     return freqs, amps, phases
 
-def fit_multi_annealing(x, y, err, f0, a0, p0, nolocalflag=True):
+def fit_multi_annealing(x, y, err, f0, a0, p0):
     # fits n sinusoids as defined by f0, a0, p0
     # uses classical simulated annealing
     print("Starting annealing...")
@@ -74,7 +74,7 @@ def fit_multi_annealing(x, y, err, f0, a0, p0, nolocalflag=True):
             a_b.append((a0[i] * (1 - config.ann_relfrac_amp), a0[i] * (1 + config.ann_relfrac_amp)))
             p_b.append((p0[i] * (1 - config.ann_relfrac_phase), p0[i] * (1 + config.ann_relfrac_phase)))
     bounds = [*f_b, *a_b, *p_b, (config.ann_zp_bounds_lower, config.ann_zp_bounds_upper)]
-    ann_res = dual_annealing(func=anneal_f, bounds=bounds, no_local_search=nolocalflag, x0= p0)
+    ann_res = dual_annealing(func=anneal_f, bounds=bounds, no_local_search=True, x0= p0)
     p = ann_res.x
     if not config.quiet:
         print(f"Anneal successful? {ann_res.success} in {ann_res.nit} iterations and {ann_res.nfev} fn evals")
