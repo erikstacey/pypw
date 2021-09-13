@@ -97,6 +97,7 @@ class Periodogram():
             pl.clf()
         else:
             pl.savefig(savename)
+            pl.clf()
     def plot_polyfit_normspace(self, savename=None):
         pl.plot(self.lsfreq, self.lsamp, color='black', label='data')
         pl.plot(self.lsfreq, self.polyfit, color='red', label='fit')
@@ -108,6 +109,7 @@ class Periodogram():
             pl.clf()
         else:
             pl.savefig(savename)
+            pl.clf()
 
 
     def diagnostic_self_plot(self, vline = None, show=False, savename = None):
@@ -117,6 +119,7 @@ class Periodogram():
             pl.axvline(vline,color='red')
         if show:
             pl.show()
+            pl.clf()
         elif savename:
             pl.savefig(savename)
             pl.clf()

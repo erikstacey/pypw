@@ -10,11 +10,11 @@ to False.
 """
 # ========== Main/Most relevant ==========
 version = "1.1"
-working_dir = f"C:/Users/Erik/main/projects/plaskett_photometry/hd47129_extractions_final/16cbv_testing"
-target_file = "HD47129_squaremask_hard_16CBV.txt"
+working_dir = f"C:/Users/Erik/main/projects/rho_pup/sec7"
+target_file = "rho_pup_lc_sec7.txt"
 cols = [0, 1, 2]
 dtype = "flux"
-n_f = 20  # number of frequencies to extract
+n_f = 2  # number of frequencies to extract
 
 averaging_bin_width = 2
 cutoff_iteration = 6

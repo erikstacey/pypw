@@ -188,6 +188,8 @@ def main():
     final_pg.plot_polyfit_log(savename="figures/residual_pg_fit_poly_log.png")
     final_pg.plot_polyfit_normspace(savename="figures/residual_pg_fit_poly_log.png")
     pl.plot(LCs[-1].time, LCs[-1].data, linestyle='none', marker='.', markersize=1, color="black")
+    pl.xlabel("Time [HJD - 2457000]")
+    pl.ylabel(f"Diff. Brightness [{config.target_dtype}]")
     pl.savefig("figures/residual_lc.png")
     pl.clf()
     LCs[-1].periodogram.diagnostic_self_plot(savename="figures/residual_pg.png")

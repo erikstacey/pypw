@@ -12,7 +12,7 @@ def save_csv_flist(filename, freqs, amps, phases, ferr, aerr, perr, sig):
 def save_config(filename):
     cfgdict = config.__dict__
     with open(config.working_dir+f"/{filename}", 'w') as f:
-        f.write(datetime.today.strftime('%Y-%m-%d-%H:%M:%S'))
+        #f.write(datetime.today.strftime('%Y-%m-%d-%H:%M:%S'))
         for key in cfgdict:
             f.write(f"{key} = {cfgdict[key]} \n")
 
