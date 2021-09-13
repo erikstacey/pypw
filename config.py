@@ -10,8 +10,8 @@ to False.
 """
 # ========== Main/Most relevant ==========
 version = "1.1"
-working_dir = f"C:/Users/Erik/main/projects/rho_pup/sec7"
-target_file = "rho_pup_lc_sec7.txt"
+working_dir = f"C:/Users/Erik/main/projects/rho_pup/sec34"
+target_file = "rho_pup_lc_sec34.txt"
 cols = [0, 1, 2]
 dtype = "flux"
 n_f = 2  # number of frequencies to extract
