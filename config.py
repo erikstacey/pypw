@@ -10,18 +10,18 @@ to False.
 """
 # ========== Main/Most relevant ==========
 version = "1.1"
-working_dir = f"C:/Users/Erik/main/projects/rho_pup/sec34"
-target_file = "rho_pup_lc_sec34.txt"
+working_dir = f"/Users/erikstacey/main/projects/plaskett_photometry/hd47129_extractions_final/16cbv_testing"
+target_file = "HD47129_squaremask_hard_16CBV.txt"
 cols = [0, 1, 2]
 dtype = "flux"
-n_f = 2  # number of frequencies to extract
+n_f = 19  # number of frequencies to extract
 
 averaging_bin_width = 2
 cutoff_iteration = 6
 cutoff_sig = 3
 
 multi_fit_type = "lm"  # "anneal", "lm", "scipy". Sets fitting engine to use.
-residual_model_generation = "mf" # can be sf, mf. Controls which model is used to generate residual periodogram
+residual_model_generation = "sf" # can be sf, mf. Controls which model is used to generate residual periodogram
 
 clean_existing = True
 
