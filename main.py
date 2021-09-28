@@ -77,6 +77,8 @@ def main():
     mf_model = np.zeros(len(LC0.time), dtype=float)
     res = 1.5/(max(LC0.time)-min(LC0.time))
     print(f"Performing analysis assuming frequency resolution of {res:.3f}")
+    with open(f"{config.working_dir}/freq_logs/SF_fits.csv", 'w') as f:
+        f.write("Freq,Amp,Phase\n")
 
     if not config.quiet:
         print("Starting iterations")
@@ -101,6 +103,10 @@ def main():
                 break
             else:
                 c_p_guess += 0.4
+
+        with open(f"{config.working_dir}/freq_logs/SF_fits.csv", 'a') as f:
+            f.write(f"{sf_f},{sf_a},{sf_p}\n")
+
         sf_model = sin_model(LC0.time, sf_f, sf_a, sf_p)
 
         #plot the SF model, and the periodogram

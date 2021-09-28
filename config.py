@@ -10,7 +10,7 @@ to False.
 """
 # ========== Main/Most relevant ==========
 version = "1.1"
-working_dir = f"/Users/erikstacey/main/projects/plaskett_photometry/hd47129_extractions_final/16cbv_testing"
+working_dir = f"C:/Users/Erik/main/projects/plaskett_photometry/hd47129_extractions_final/16cbv_testing"
 target_file = "HD47129_squaremask_hard_16CBV.txt"
 cols = [0, 1, 2]
 dtype = "flux"
