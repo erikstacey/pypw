@@ -36,10 +36,7 @@ from Freq import Freq
 import matplotlib.pyplot as pl
 import time
 from pw_io import save_csv_flist, save_config
-from models import sin_model
-
-from optimization import fit_multi_lm, fit_single_lm, fit_multi_annealing
-from optimization_lm import fit_multi_lmfit
+from Dataset import Dataset
 
 def gen_flists_from_objlist(freqs):
     """Takes list of frequency objects (Freq.py) and converts it to a list of frequency, amplitude, and phase vals"""
@@ -69,143 +66,18 @@ def main():
         os.makedirs(folder)
     imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True)
     pptime, ppdata, pperr = preprocess(imptime, impdata, imperr)
-    pl.plot(pptime, ppdata)
+    pl.plot(pptime, ppdata, color='black', marker='.', markersize=0.5, linestyle=None)
+    pl.xlabel("Time [HJD]")
+    pl.ylabel(f"Amplitude [{config.target_dtype}]")
     pl.show()
-    LC0 = Lightcurve(time=pptime, data=ppdata, err=pperr)
-    LCs = np.array([LC0], dtype=Lightcurve)
-    freqs = np.array([], dtype=Freq)
-    mf_model = np.zeros(len(LC0.time), dtype=float)
-    res = 1.5/(max(LC0.time)-min(LC0.time))
-    print(f"Performing analysis assuming frequency resolution of {res:.3f}")
-    with open(f"{config.working_dir}/freq_logs/SF_fits.csv", 'w') as f:
-        f.write("Freq,Amp,Phase\n")
 
-    if not config.quiet:
-        print("Starting iterations")
-    for i in range(config.n_f):
-        if not config.quiet:
-            print(f"===== STARTING ITERATION {i} =====")
-        ##### Stage 1: Identify frequency on newest LC and perform SF fit
-        if not config.quiet:
-            print("\tStarting stage 1 - identify new frequency and perform single fit")
-            ct0 = time.time()
-        if config.freq_selection_method == "highest":
-            cpg_f, cpg_a = LCs[-1].periodogram.highest_ampl()
-        elif config.freq_selection_method == "binned":
-            cpg_f, cpg_a = LCs[-1].periodogram.peak_selection_w_bins()
-        if cpg_f is None:
-            print(f"Stop criterion reached at iteration {i}")
-            break
-        c_p_guess = 0
-        while True:
-            sf_f, sf_a, sf_p = fit_single_lm(LCs[-1].time, LCs[-1].data, LCs[-1].err, cpg_f, cpg_a, c_p_guess)
-            if abs(sf_p-c_p_guess) > config.phase_fit_rejection_criterion:
-                break
-            else:
-                c_p_guess += 0.4
+    ds = Dataset(pptime, ppdata, pperr)
 
-        with open(f"{config.working_dir}/freq_logs/SF_fits.csv", 'a') as f:
-            f.write(f"{sf_f},{sf_a},{sf_p}\n")
+    while len(ds.freqs) < config.n_f:
+        ds.it_pw()
 
-        sf_model = sin_model(LC0.time, sf_f, sf_a, sf_p)
+    ds.save_results("frequencies.csv")
+    ds.save_sf_results(f"{os.getcwd()}/freq_logs/SF_all.csv")
 
-        #plot the SF model, and the periodogram
-        if config.plot_iterative_lcs:
-            pl.plot(LCs[-1].time, LCs[-1].data, linestyle='none', marker='.', markersize=1, color="black")
-            pl.plot(LCs[-1].time, sin_model(LCs[-1].time, sf_f, sf_a, sf_p), color='red')
-            pl.savefig(f"figures_lcs_iterative/sf_model_{i}.png")
-            pl.clf()
-        if config.plot_iterative_pgs:
-            LCs[-1].periodogram.diagnostic_self_plot(vline = cpg_f, savename=f"figures_periodograms_iterative/{i}.png")
-        freqs = np.append(freqs, Freq(sf_f, sf_a, sf_p, n=i))
-        freqs[-1].prettyprint()
-        ##### Stage 2: unpack frequencies from list of objects to freq, amp, phase arrays
-        if not config.quiet:
-            print(f"\tStage 1 complete in {time.time()-ct0}")
-            print("\tStarting stage 2 - setting up for multi-frequency fit")
-            ct0 = time.time()
-        mf_freqs0, mf_amps0, mf_phases0 = gen_flists_from_objlist(freqs)
-        ##### Stage 3: multi-frequency optimization
-        # TODO: Figure out why this takes so long at high numbers of parameters (>20) compared to scipy
-        if not config.quiet:
-            print(f"\tStage 2 complete in {time.time()-ct0}")
-            print("\tStarting stage 3 - multi-frequency fit")
-            ct0 = time.time()
-        if config.multi_fit_type=="lm":
-            fit_multi_fn = fit_multi_lmfit
-        elif config.multi_fit_type=="anneal":
-            fit_multi_fn = fit_multi_annealing
-        elif config.multi_fit_type == "scipy":
-            fit_multi_fn = fit_multi_lm
-        fit_freqs, fit_amps, fit_phases = fit_multi_fn(x=LC0.time, y=LC0.data, err=LC0.err, f0=mf_freqs0,
-                                                            a0=mf_amps0, p0=mf_phases0)
-        ##### Stage 4: update frequency objects
-        if not config.quiet:
-            print(f"\tStage 3 complete in {time.time()-ct0}")
-            print("\tStarting stage 4 - updating frequencies")
-            ct0 = time.time()
-        for k in range(len(fit_freqs)):
-            freqs[k].update(fit_freqs[k], fit_amps[k], fit_phases[k])
-        #### Stage 5: (re)generate current model
-        if not config.quiet:
-            print(f"\tStage 4 complete in {time.time()-ct0}")
-            print("\tStarting stage 5 - making current model")
-            ct0 = time.time()
-
-        mf_model[:] = 0
-        for freq in freqs:
-            mf_model += freq.genmodel(LC0.time)
-        if config.plot_iterative_lcs:
-            pl.plot(LCs[-1].time, LCs[-1].data, linestyle='none', marker='.', markersize=1, color="black")
-            pl.plot(LCs[-1].time, mf_model, color='red')
-            pl.savefig(f"figures_lcs_iterative/mf_model_{i}.png")
-            pl.clf()
-        ##### Stage 6: Create and store residual light curve
-        if not config.quiet:
-            print(f"\tStage 5 complete in {time.time()-ct0}")
-            print("\tStarting stage 6 - making and storing residual LC")
-            ct0 = time.time()
-
-        if config.residual_model_generation == "sf":
-            r_lc = Lightcurve(LC0.time, LCs[-1].data-sf_model, LC0.err)
-        elif config.residual_model_generation == "mf":
-            r_lc = Lightcurve(LC0.time, LCs[0].data - mf_model, LC0.err)
-        if config.plot_iterative_lcs:
-            r_lc.diag_plot(show=False, savename=f"figures_lcs_iterative/residual_{i}.png")
-
-        LCs = np.append(LCs, r_lc)
-        if not config.quiet:
-            print(f"\tStage 6 complete in {time.time()-ct0}")
-            print("CURRENT RESULTS")
-            for freq in freqs:
-                freq.prettyprint()
-        if config.save_freq_logs:
-            sfreqs, samps, sphases = gen_flists_from_objlist(freqs)
-            save_csv_flist(config.freqlog_folder+f"/freqs_{i}.csv", sfreqs, samps, sphases, np.zeros(len(sfreqs)),
-                           np.zeros(len(sfreqs)),
-                           np.zeros(len(sfreqs)), np.zeros(len(sfreqs)))
-
-        if not config.quiet:
-            print("\n\n")
-    # post events
-    # PLOTS
-    final_pg = LCs[-1].periodogram
-    final_pg.fit_self_lopoly()
-    final_pg.plot_polyfit_log(savename="figures/residual_pg_fit_poly_log.png")
-    final_pg.plot_polyfit_normspace(savename="figures/residual_pg_fit_poly_log.png")
-    pl.plot(LCs[-1].time, LCs[-1].data, linestyle='none', marker='.', markersize=1, color="black")
-    pl.xlabel("Time [BJD - 2457000]")
-    pl.ylabel(f"Diff. Brightness [{config.target_dtype}]")
-    pl.savefig("figures/residual_lc.png")
-    pl.clf()
-    LCs[-1].periodogram.diagnostic_self_plot(savename="figures/residual_pg.png")
-
-    for freq in freqs:
-        freq.sig = freq.amp / final_pg.get_polyfit_at_val(freq.freq)
-        freq.prettyprint_sig()
-
-    sfreqs, samps, sphases, ssigs = gen_flists_from_objlist_full(freqs)
-    save_csv_flist(config.frequencies_fname, sfreqs, samps, sphases, ssigs,np.zeros(len(sfreqs)),
-                   np.zeros(len(sfreqs)), np.zeros(len(sfreqs)))
 
 main()

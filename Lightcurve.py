@@ -17,3 +17,5 @@ class Lightcurve():
         if savename:
             pl.savefig(savename)
             pl.clf()
+    def unpack(self):
+        return self.time, self.data, self.err
