@@ -35,7 +35,6 @@ def preprocess(time0, data0, err0):
     time, data, err = time0, data0, err0
     if config.strip_gaps:
         time, data, err = stripgaps(time, data, err, config.gap_size, config.strip_gaps_points)
-
     if config.target_dtype == "flux" and config.target_dtype != config.dtype:
         print("Program incapable of converting something else to flux at the moment")
         quit()
@@ -57,9 +56,6 @@ def preprocess(time0, data0, err0):
     else:
         print("Could not figure out how to convert to target data type")
         quit()
-    pl.plot(time, data, color='black', marker='.', markersize=0.1)
-    pl.savefig(f"figures/LC0.png")
-    pl.clf()
     return time, data-np.mean(data), err
 
 

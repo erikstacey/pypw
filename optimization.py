@@ -36,9 +36,18 @@ def mf_opt_lm(x, data, err, freqs):
     f_result = mf_mod.fit(data=data, weights = err, x=x)
     #print(f_result.fit_report())
     for i in range(len(freqs)):
+        # check boundaries
+        c_sfmod = sf_mods[i]
+        for ptype in ["f", "a", "p"]:
+            if abs(c_sfmod.param_hints[ptype]["min"]-f_result.best_values[f"f{i}{ptype}"]) < config.boundary_warnings * f_result.best_values[f"f{i}{ptype}"]:
+                print(f"\t\t WARNING: {ptype} {f_result.best_values[f'f{i}{ptype}']} of f{i} within {config.boundary_warnings*100}% of lower boundary {c_sfmod.param_hints[ptype]['min']}")
+            elif abs(c_sfmod.param_hints[ptype]["max"]-f_result.best_values[f"f{i}{ptype}"]) < config.boundary_warnings * f_result.best_values[f"f{i}{ptype}"]:
+                print(f"\t\t WARNING: {ptype} {f_result.best_values[f'f{i}{ptype}']} of f{i} within {config.boundary_warnings*100}% of upper boundary {c_sfmod.param_hints[ptype]['max']}")
         freqs[i].f = f_result.best_values[f"f{i}f"]
         freqs[i].a = f_result.best_values[f"f{i}a"]
         freqs[i].p = f_result.best_values[f"f{i}p"]
+
+
 
     return f_result.best_fit
 

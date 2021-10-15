@@ -61,11 +61,14 @@ def gen_flists_from_objlist_full(freqs):
 def main():
     save_config("configlog.txt")
     os.chdir(config.working_dir)
-    for folder in ["figures", "figures_lcs_iterative", "figures_periodograms_iterative", "freq_logs"]:
+    for folder in ["figures", "figures_iterative", "freq_logs"]:
         shutil.rmtree(folder, ignore_errors=True)
         os.makedirs(folder)
     imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True)
     pptime, ppdata, pperr = preprocess(imptime, impdata, imperr)
+    with open(f"pp_{config.target_file.split('.')[0]}.csv", 'w') as f:
+        for i in range(len(pptime)):
+            f.write(f"{pptime[i]},{ppdata[i]},{pperr}\n")
     pl.plot(pptime, ppdata, color='black', marker='.', markersize=0.5, linestyle=None)
     pl.xlabel("Time [HJD]")
     pl.ylabel(f"Amplitude [{config.target_dtype}]")
@@ -74,7 +77,9 @@ def main():
     ds = Dataset(pptime, ppdata, pperr)
 
     while len(ds.freqs) < config.n_f:
-        ds.it_pw()
+        c_code = ds.it_pw()
+        if c_code == 1:
+            break
 
     ds.save_results("frequencies.csv")
     ds.save_sf_results(f"{os.getcwd()}/freq_logs/SF_all.csv")

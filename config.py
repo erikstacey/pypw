@@ -14,15 +14,16 @@ working_dir = f"C:/Users/Erik/main/projects/plaskett_photometry/hd47129_extracti
 target_file = "HD47129_squaremask_hard_16CBV.txt"
 cols = [0, 1, 2]
 dtype = "flux"
-n_f = 19  # number of frequencies to extract
+n_f = 25  # number of frequencies to extract
 
-averaging_bin_width = 2
-cutoff_iteration = 6
+peak_selection = "bin"
+averaging_bin_radius = 0.25
+cutoff_iteration = 10
 cutoff_sig = 3
 
 multi_fit_type = "lm"  # "anneal", "lm", "scipy". Sets fitting engine to use.
 residual_model_generation = "sf" # can be sf, mf. Controls which model is used to generate residual periodogram
-
+boundary_warnings = 0.05
 clean_existing = True
 
 # ========== Preprocessing ==========
@@ -66,9 +67,9 @@ periodograms_upperbound = 20
 # ========== Plots ==========
 
 figure_subdir = "/figures"
+reg_plots = True
 iterative_subdir = "/figures_iterative"
-plot_iterative_lcs = True
-plot_iterative_pgs = True
+plot_iterative = True
 
 # ========== Dual Annealing ==========
 frequencies_da_filename = "frequencies_da.csv"

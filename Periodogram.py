@@ -19,7 +19,7 @@ class Periodogram():
             lowerbound = config.periodograms_lowerbound
         upperbound = config.periodograms_upperbound
 
-        lsfreq = np.linspace(lowerbound, upperbound, 10 * int((upperbound - lowerbound) / self.resolution))
+        lsfreq = np.linspace(lowerbound, upperbound, 50 * int((upperbound - lowerbound) / self.resolution))
         # lsfreq = np.linspace(0.001, 20, 20000)
 
         lspower = LombScargle(time, data, normalization='psd').power(lsfreq)
@@ -41,35 +41,106 @@ class Periodogram():
         if mask is None:
             ymax = np.argmax(self.lsamp)
             xatpeak = self.lsfreq[ymax]
+            return xatpeak, self.lsamp[ymax]
         else:
             filtered_lsamp = self.lsamp[mask]
             filtered_lsfreq = self.lsfreq[mask]
             ymax = np.argmax(filtered_lsamp)
             xatpeak = filtered_lsfreq[ymax]
-        return xatpeak, self.lsamp[ymax]
-    def get_avg_around_pt(self, freq, width):
-        indices_to_use = []
-        for i in range(len(self.lsfreq)):
-            if freq-width <= self.lsfreq[i] < freq+width:
-                indices_to_use.append(i)
-        return np.mean(self.lsamp[indices_to_use])
+            return xatpeak, filtered_lsamp[ymax]
 
-    def peak_selection_w_bins(self):
-        selection_exclusion_mask = np.ones(len(self.lsfreq), dtype=bool)
-        for it in range(config.cutoff_iteration):
-            cf, ca = self.highest_ampl(mask = selection_exclusion_mask)
-            loc_avg = self.get_avg_around_pt(cf, config.averaging_bin_width)
-            sig = ca/loc_avg
-            if sig > config.cutoff_sig:
-                return cf, ca
+
+    def find_troughs(self, center):
+        count = 0
+        left_i, right_i = None, None
+        while (not left_i) or (not right_i):
+            count+=1
+            # check for left trough
+            if center - count == 0 or self.lsamp[center-count] >= self.lsamp[center-count+1]:
+                left_i = center-count+1
+            if center + count == len(self.lsfreq) or self.lsamp[center+count] <= self.lsamp[center+count-1]:
+                right_i = center+count-1
+        return left_i, right_i
+    def find_index_of_freq(self, t):
+        c_arr = self.lsfreq
+        lower_bound = 0
+        upper_bound = len(c_arr)
+        while True:
+            mid_i = (upper_bound-lower_bound)//2 + lower_bound
+            if t > self.lsfreq[mid_i]:
+                lower_bound = mid_i
+            elif t <= self.lsfreq[mid_i]:
+                upper_bound = mid_i
+            if upper_bound-lower_bound <= 1:
+                lower_diff = abs(self.lsfreq[lower_bound]-t)
+                upper_diff = abs(self.lsfreq[upper_bound]-t)
+                if lower_diff>upper_diff:
+                    return upper_bound
+                else:
+                    return lower_bound
+
+                return lower_bound
+    def get_peak_sig(self, center_val_freq):
+        center_i_freq = np.where(self.lsfreq == center_val_freq)[0][0]
+        trough_left_i, trough_right_i = self.find_troughs(center_i_freq)
+        if not config.quiet:
+            print(f"\tPeak spans {self.lsfreq[trough_left_i]:.3f} to {self.lsfreq[trough_right_i]}")
+        lower_val_freq = self.lsfreq[center_i_freq]-config.averaging_bin_radius
+        upper_val_freq = self.lsfreq[center_i_freq]+config.averaging_bin_radius
+        if lower_val_freq < 0:
+            lower_val_freq = 0
+        if upper_val_freq > config.periodograms_upperbound:
+            upper_val_freq = config.periodograms_upperbound
+        lower_i_freq = self.find_index_of_freq(lower_val_freq)
+        upper_i_freq = self.find_index_of_freq(upper_val_freq)
+        if lower_i_freq<0:
+            lower_i_freq = 0
+        if upper_i_freq > len(self.lsfreq):
+            upper_i_freq = len(self.lsfreq)
+
+        lower_avg_region = self.lsamp[lower_i_freq:trough_left_i]
+        upper_avg_region = self.lsamp[trough_right_i:upper_i_freq]
+        total_avg_region = np.concatenate((lower_avg_region,upper_avg_region))
+
+        avg_regions_avg = np.mean(total_avg_region)
+        freq_amp = self.lsamp[center_i_freq]
+        if not config.quiet:
+            print(f"\tAveraged from {lower_val_freq:.3f}:{self.lsfreq[trough_left_i]:.3f} and {self.lsfreq[trough_right_i]:.3f}:{upper_val_freq:.3f}")
+            print(f"\tYielded avg = {avg_regions_avg:.3f} ||| Nom. Freq. amp = {self.lsamp[center_i_freq]:.3f}")
+        pl.plot(self.lsfreq, self.lsamp, color='black')
+        pl.plot(self.lsfreq[lower_i_freq:trough_left_i], lower_avg_region, color='orange')
+        pl.plot(self.lsfreq[trough_right_i:upper_i_freq], upper_avg_region, color='orange')
+        pl.axvline(lower_val_freq, color='blue')
+        pl.axvline(upper_val_freq, color='blue')
+        pl.axvline(self.lsfreq[trough_left_i], color='red')
+        pl.axvline(self.lsfreq[trough_right_i], color='red')
+        pl.xlim(lower_val_freq*0.9, upper_val_freq*1.1)
+        pl.show()
+        pl.clf()
+
+        return freq_amp / avg_regions_avg, trough_left_i, trough_right_i
+
+    def peak_selection_w_sig(self):
+        cur_mask = np.ones(len(self.lsfreq), dtype=bool)
+        count = 0
+        while count < config.cutoff_iteration:
+            c_max_freq, c_max_amp = self.highest_ampl(mask=cur_mask)
+            if not config.quiet:
+                print(f"Identified peak at f={c_max_freq:.3f} : a={c_max_amp:.3f}")
+            c_sig, trough_left_i, trough_right_i = self.get_peak_sig(c_max_freq)
+            if c_sig > config.cutoff_sig:
+                print(f"Accepted frequency - sig of {c_sig:.3f} < {config.cutoff_sig} ({count})")
+                return c_max_freq, c_max_amp
             else:
-                freq_spacing = self.lsfreq[1]-self.lsfreq[0]
-                index_excl_radius = int(self.resolution // freq_spacing)
-                central_i = np.where(self.lsfreq == cf)[0][0]
-                lower_i = 0 if central_i - index_excl_radius < 0 else central_i-index_excl_radius
-                upper_i = len(self.lsfreq) if central_i+index_excl_radius > len(self.lsfreq) else central_i+index_excl_radius
-                selection_exclusion_mask[lower_i:upper_i] = False
+                if not config.quiet:
+                    print(f"Rejected frequency - sig of {c_sig:.3f} < {config.cutoff_sig} ({count})")
+                count += 1
+                for i in range(trough_left_i, trough_right_i):
+                    cur_mask[i] = False
         return None, None
+
+
+
 
     def fit_self_lopoly(self):
         p0 = [0, 0, 0, 0]
@@ -112,9 +183,11 @@ class Periodogram():
             pl.clf()
 
 
-    def diagnostic_self_plot(self, vline = None, show=False, savename = None):
+    def plot(self, xlim = (0, 8), vline = None, show=False, savename = None):
         pl.plot(self.lsfreq, self.lsamp, color='black')
-        pl.xlim(0, 2)
+        pl.xlabel("Frequency [c/d]")
+        pl.ylabel(f"Amplitude [{config.target_dtype}]")
+        pl.xlim(*xlim)
         if vline is not None:
             pl.axvline(vline,color='red')
         if show:
