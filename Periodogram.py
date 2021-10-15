@@ -51,14 +51,14 @@ class Periodogram():
 
 
     def find_troughs(self, center):
-        count = 0
+        count = 2
         left_i, right_i = None, None
         while (not left_i) or (not right_i):
             count+=1
             # check for left trough
-            if center - count == 0 or self.lsamp[center-count] >= self.lsamp[center-count+1]:
+            if not left_i and (center - count == 0 or self.lsamp[center-count] >= self.lsamp[center-count+1]):
                 left_i = center-count+1
-            if center + count == len(self.lsfreq) or self.lsamp[center+count] <= self.lsamp[center+count-1]:
+            if not right_i and (center + count == len(self.lsfreq) or self.lsamp[center+count] >= self.lsamp[center+count-1]):
                 right_i = center+count-1
         return left_i, right_i
     def find_index_of_freq(self, t):
@@ -114,6 +114,7 @@ class Periodogram():
         pl.axvline(upper_val_freq, color='blue')
         pl.axvline(self.lsfreq[trough_left_i], color='red')
         pl.axvline(self.lsfreq[trough_right_i], color='red')
+        pl.axvline(center_val_freq, color='black', linestyle = '--')
         pl.xlim(lower_val_freq*0.9, upper_val_freq*1.1)
         pl.show()
         pl.clf()

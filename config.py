@@ -17,7 +17,7 @@ dtype = "flux"
 n_f = 25  # number of frequencies to extract
 
 peak_selection = "bin"
-averaging_bin_radius = 0.25
+averaging_bin_radius = 1
 cutoff_iteration = 10
 cutoff_sig = 3
 
