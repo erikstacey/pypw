@@ -30,7 +30,10 @@ class Dataset():
         if config.peak_selection == "highest":
             sf_f_guess, sf_a_guess = c_lc.periodogram.highest_ampl()
         elif config.peak_selection == "bin":
-            sf_f_guess, sf_a_guess = c_lc.periodogram.peak_selection_w_sig()
+            if len(self.freqs)+1 <= config.bin_highest_override:
+                sf_f_guess, sf_a_guess = c_lc.periodogram.highest_ampl()
+            else:
+                sf_f_guess, sf_a_guess = c_lc.periodogram.peak_selection_w_sig()
 
         if sf_f_guess == None:
             print("STOP CRITERION TRIGGERED")

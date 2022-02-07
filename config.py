@@ -16,9 +16,10 @@ cols = [0, 1, 2]
 dtype = "flux"
 n_f = 25  # number of frequencies to extract
 
-peak_selection = "bin"
+peak_selection = "bin" # can be highest, bin, custom - custom used for plaskett TESS paper
+bin_highest_override = 7
 averaging_bin_radius = 1
-cutoff_iteration = 10
+cutoff_iteration = 20
 cutoff_sig = 3
 
 multi_fit_type = "lm"  # "anneal", "lm", "scipy". Sets fitting engine to use.

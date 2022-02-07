@@ -59,6 +59,7 @@ def gen_flists_from_objlist_full(freqs):
     return flist, alist, plist, slist
 
 def main():
+    # todo: use low snr cutoff and high iteration cutoff to extract lots of frequencies. Then assess them individually.
     save_config("configlog.txt")
     os.chdir(config.working_dir)
     for folder in ["figures", "figures_iterative", "freq_logs"]:

@@ -115,7 +115,8 @@ class Periodogram():
         pl.axvline(self.lsfreq[trough_left_i], color='red')
         pl.axvline(self.lsfreq[trough_right_i], color='red')
         pl.axvline(center_val_freq, color='black', linestyle = '--')
-        pl.xlim(lower_val_freq*0.9, upper_val_freq*1.1)
+        pl.xlim(0,4)
+        pl.ylim(0,20)
         pl.show()
         pl.clf()
 
