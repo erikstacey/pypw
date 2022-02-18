@@ -60,6 +60,8 @@ class Periodogram():
                 left_i = center-count+1
             if not right_i and (center + count == len(self.lsfreq) or self.lsamp[center+count] >= self.lsamp[center+count-1]):
                 right_i = center+count-1
+        if left_i < 0: # ensure no wraparound
+            left_i = 0
         return left_i, right_i
     def find_index_of_freq(self, t):
         c_arr = self.lsfreq
@@ -107,18 +109,19 @@ class Periodogram():
         if not config.quiet:
             print(f"\tAveraged from {lower_val_freq:.3f}:{self.lsfreq[trough_left_i]:.3f} and {self.lsfreq[trough_right_i]:.3f}:{upper_val_freq:.3f}")
             print(f"\tYielded avg = {avg_regions_avg:.3f} ||| Nom. Freq. amp = {self.lsamp[center_i_freq]:.3f}")
-        pl.plot(self.lsfreq, self.lsamp, color='black')
-        pl.plot(self.lsfreq[lower_i_freq:trough_left_i], lower_avg_region, color='orange')
-        pl.plot(self.lsfreq[trough_right_i:upper_i_freq], upper_avg_region, color='orange')
-        pl.axvline(lower_val_freq, color='blue')
-        pl.axvline(upper_val_freq, color='blue')
-        pl.axvline(self.lsfreq[trough_left_i], color='red')
-        pl.axvline(self.lsfreq[trough_right_i], color='red')
-        pl.axvline(center_val_freq, color='black', linestyle = '--')
-        pl.xlim(0,4)
-        pl.ylim(0,20)
-        pl.show()
-        pl.clf()
+        if config.runtime_plots:
+            pl.plot(self.lsfreq, self.lsamp, color='black')
+            pl.plot(self.lsfreq[lower_i_freq:trough_left_i], lower_avg_region, color='orange')
+            pl.plot(self.lsfreq[trough_right_i:upper_i_freq], upper_avg_region, color='orange')
+            pl.axvline(lower_val_freq, color='blue')
+            pl.axvline(upper_val_freq, color='blue')
+            pl.axvline(self.lsfreq[trough_left_i], color='red')
+            pl.axvline(self.lsfreq[trough_right_i], color='red')
+            pl.axvline(center_val_freq, color='black', linestyle = '--')
+            pl.xlim(0,4)
+            pl.ylim(0,20)
+            pl.show()
+            pl.clf()
 
         return freq_amp / avg_regions_avg, trough_left_i, trough_right_i
 

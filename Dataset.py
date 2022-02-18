@@ -38,24 +38,37 @@ class Dataset():
         if sf_f_guess == None:
             print("STOP CRITERION TRIGGERED")
             return 1
+        sf_p_guess = 0.5
         while True:
-            sf_p_guess = 0.5
             sf_f, sf_a, sf_p, sf_mod = opt.sf_opt_lm(c_lc.time, c_lc.data, c_lc.err, f0=sf_f_guess, a0 = sf_a_guess, p0=sf_p_guess)
             # check if phase has moved or not
             if abs(sf_p-sf_p_guess) > 0.1:
+                print("Phase fit check fine")
                 break
             else:
-                sf_p_guess += 0.17
+                print(f"SF Fit of phase {sf_p:.3f} too close to guess of {sf_p_guess:.3f}; adjusting by 0.11")
+                sf_p_guess += 0.11
         self.freqs.append(Freq(sf_f, sf_a, sf_p, len(self.freqs)))
 
 
         self.freqs[-1].prettyprint()
+        if config.runtime_plots:
+            print("PLOTTING SINGLE FREQUENCY FIT")
+            self.lcs[-1].plot(show=False, color='black')
+            self.freqs[-1].diag_plot(self.lcs[-1].time, show=True)
+            pl.clf()
 
         # do multi-frequency fit
         mf_mod = opt.mf_opt_lm(self.LC0.time, self.LC0.data, self.LC0.err, self.freqs)
         print(f"MF Fit:")
         for freq in self.freqs:
             freq.prettyprint()
+
+        if config.runtime_plots:
+            print("PLOTTING MULTI-FREQUENCY FIT")
+            self.lcs[0].plot(show=True, color='black', model = self.total_model())
+            pl.clf()
+
 
         # save plots
         if config.plot_iterative:
@@ -82,3 +95,8 @@ class Dataset():
             for freq in self.freqs:
                 f.write(f"{freq.f0},{freq.a0},{freq.p0}\n")
 
+    def total_model(self):
+        model = np.zeros(len(self.LC0.time))
+        for freq in self.freqs:
+            model += freq.genmodel(self.LC0.time)
+        return model

@@ -16,9 +16,9 @@ cols = [0, 1, 2]
 dtype = "flux"
 n_f = 25  # number of frequencies to extract
 
-peak_selection = "bin" # can be highest, bin, custom - custom used for plaskett TESS paper
-bin_highest_override = 7
-averaging_bin_radius = 1
+peak_selection = "bin" # can be highest, bin
+bin_highest_override = 7 # sets the number of frequencies
+averaging_bin_radius = 0.25
 cutoff_iteration = 20
 cutoff_sig = 3
 
@@ -71,6 +71,7 @@ figure_subdir = "/figures"
 reg_plots = True
 iterative_subdir = "/figures_iterative"
 plot_iterative = True
+runtime_plots = True  # shows stuff as the program is running for debugging purposes
 
 # ========== Dual Annealing ==========
 frequencies_da_filename = "frequencies_da.csv"
