@@ -62,14 +62,11 @@ def main():
     # todo: use low snr cutoff and high iteration cutoff to extract lots of frequencies. Then assess them individually.
     save_config("configlog.txt")
     os.chdir(config.working_dir)
-    for folder in ["figures", "figures_iterative", "freq_logs"]:
+    for folder in ["figures", "figures_iterative", "freq_logs", "supp_data"]:
         shutil.rmtree(folder, ignore_errors=True)
         os.makedirs(folder)
     imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True)
     pptime, ppdata, pperr = preprocess(imptime, impdata, imperr)
-    with open(f"pp_{config.target_file.split('.')[0]}.csv", 'w') as f:
-        for i in range(len(pptime)):
-            f.write(f"{pptime[i]},{ppdata[i]},{pperr}\n")
     pl.plot(pptime, ppdata, color='black', marker='.', markersize=0.5, linestyle=None)
     pl.xlabel("Time [HJD]")
     pl.ylabel(f"Amplitude [{config.target_dtype}]")

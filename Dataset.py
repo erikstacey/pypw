@@ -20,6 +20,9 @@ class Dataset():
         if config.reg_plots:
             self.LC0.plot(savename=os.getcwd()+config.figure_subdir+"/LC0.png")
             self.LC0.periodogram.plot(savename=os.getcwd() + config.figure_subdir + "/PG0.png")
+        if config.save_supp_data:
+            self.save_data("LC0.csv", self.LC0.time, self.LC0.data, self.LC0.err)
+            self.save_data("PG0.csv", self.LC0.periodogram.lsfreq, self.LC0.periodogram.lsamp)
 
 
     def it_pw(self):
@@ -82,6 +85,11 @@ class Dataset():
         elif config.residual_model_generation == "mf":
             self.lcs.append(Lightcurve(self.LC0.time, self.LC0.data-mf_mod, self.LC0.err))
 
+        # save LC and periodograms if specified
+        if config.save_supp_data:
+            self.save_data(f"LC{len(self.freqs)}.csv", self.lcs[-1].time, self.lcs[-1].data, self.lcs[-1].err)
+            self.save_data(f"PG{len(self.freqs)}.csv", self.lcs[-1].periodogram.lsfreq, self.lcs[-1].periodogram.lsamp)
+
         return 0
     def save_results(self, f_name):
         with open(f_name, 'w') as f:
@@ -100,3 +108,11 @@ class Dataset():
         for freq in self.freqs:
             model += freq.genmodel(self.LC0.time)
         return model
+
+    def save_data(self, filename, x, y, err=None):
+        with open(f"supp_data/{filename}", 'w') as f:
+            for i in range(len(x)):
+                if err is not None:
+                    f.write(f"{x[i]},{y[i]},{err[i]}\n")
+                else:
+                    f.write(f"{x[i]},{y[i]}\n")

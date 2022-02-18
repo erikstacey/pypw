@@ -43,7 +43,7 @@ quiet = False
 # ========== Output targets ==========
 preprocessed_lightcurve_fname = "inp_lc.dat"
 frequencies_fname = "frequencies.csv"
-
+save_supp_data = True
 # ========== Frequency Selection ==========
 # TODO: implement LOPOLY fit for freq selection+rejection by significance
 freq_selection_method = "highest" # can be highest, or averaged
