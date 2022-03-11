@@ -15,17 +15,20 @@ target_file = "HD47129_squaremask_hard_16CBV.txt"
 cols = [0, 1, 2]
 dtype = "flux"
 n_f = 25  # number of frequencies to extract
+delimiter = ' '
 
 peak_selection = "bin" # can be highest, bin
 bin_highest_override = 7 # sets the number of frequencies
 averaging_bin_radius = 0.25
-cutoff_iteration = 20
+cutoff_iteration = 30
 cutoff_sig = 3
 
 multi_fit_type = "lm"  # "anneal", "lm", "scipy". Sets fitting engine to use.
 residual_model_generation = "sf" # can be sf, mf. Controls which model is used to generate residual periodogram
 boundary_warnings = 0.05
 clean_existing = True
+
+sig_method = "poly" # "poly" or "box_avg"
 
 # ========== Preprocessing ==========
 target_dtype = "mmag"  # allowed values: mag, mmag, flux (only if data originally in flux)
@@ -50,6 +53,8 @@ freq_selection_method = "highest" # can be highest, or averaged
 
 # ========== Fitting ==========
 phase_fit_rejection_criterion = 0.1
+
+poly_order = 3
 # ========== LM ==========
 # freq bounds use coefficients
 freq_bounds_lower_coef = 0.8
@@ -71,7 +76,7 @@ figure_subdir = "/figures"
 reg_plots = True
 iterative_subdir = "/figures_iterative"
 plot_iterative = True
-runtime_plots = True  # shows stuff as the program is running for debugging purposes
+runtime_plots = False  # shows stuff as the program is running for debugging purposes
 
 # ========== Dual Annealing ==========
 frequencies_da_filename = "frequencies_da.csv"

@@ -2,6 +2,7 @@ import numpy as np
 from models import sin_model
 import matplotlib.pyplot as pl
 
+
 class Freq():
     def __init__(self, freq, amp, phi, n):
         self.f = freq
@@ -9,18 +10,21 @@ class Freq():
         self.p = phi
         self.n = n
         self.sig = None
-        self.freq_err = None
-        self.amp_err = None
-        self.phase_err = None
+        self.f_err = None
+        self.a_err = None
+        self.p_err = None
 
         self.f0 = freq
         self.a0 = amp
         self.p0 = phi
         self.adjust_params()
-    def update(self, newfreq,newamp, newphase):
+
+    def update(self, newfreq, newamp, newphase):
         self.f, self.a, self.p = newfreq, newamp, newphase
+
     def triplet_list(self):
         return [self.f, self.a, self.p]
+
     def prettyprint(self):
         print(f"\t{self.n} // f = {self.f:.5f} | a = {self.a:.3f} | phi = {self.p:.3f}")
 
@@ -29,6 +33,7 @@ class Freq():
 
     def prettyprint_sig(self):
         print(f"{self.n} // f = {self.f:.5f} | a = {self.a:.3f} | phi = {self.p:.3f} ({self.sig})")
+
     def genmodel(self, time):
         return sin_model(time, self.f, self.a, self.p)
 
@@ -37,16 +42,18 @@ class Freq():
         # adjust amplitude
         if self.a < 0:
             self.a = abs(self.a)
-            self.p+=0.5
+            self.p += 0.5
 
         if self.p > 1 or self.p < 0:
             self.p = self.p % 1
 
         self.f0_adjusted, self.a0_adjusted, self.p0_adjusted = self.f, self.a, self.p
-    def assign_errors(self, rho, N, T, sigmaresiduals):
-        self.f_err = (6/N)**0.5 * sigmaresiduals / (np.pi*T*self.amp)
-        self.a_err = (2/N)**0.5 * sigmaresiduals
-        self.p_err = (2/N)**0.5 *sigmaresiduals / self.amp
+
+    def assign_errors(self, N, T, sigmaresiduals):
+        self.f_err = (6 / N) ** 0.5 * sigmaresiduals / (np.pi * T * self.a)
+        self.a_err = (2 / N) ** 0.5 * sigmaresiduals
+        self.p_err = (2 / N) ** 0.5 * sigmaresiduals / self.a
+
     def diag_plot(self, x, show=True, color='red'):
         pl.plot(x, self.genmodel(x), color=color)
         if show:

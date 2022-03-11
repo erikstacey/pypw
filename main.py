@@ -65,7 +65,7 @@ def main():
     for folder in ["figures", "figures_iterative", "freq_logs", "supp_data"]:
         shutil.rmtree(folder, ignore_errors=True)
         os.makedirs(folder)
-    imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True)
+    imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True, delimiter = config.delimiter)
     pptime, ppdata, pperr = preprocess(imptime, impdata, imperr)
     pl.plot(pptime, ppdata, color='black', marker='.', markersize=0.5, linestyle=None)
     pl.xlabel("Time [HJD]")
@@ -78,7 +78,7 @@ def main():
         c_code = ds.it_pw()
         if c_code == 1:
             break
-
+    ds.post()
     ds.save_results("frequencies.csv")
     ds.save_sf_results(f"{os.getcwd()}/freq_logs/SF_all.csv")
 

@@ -5,6 +5,7 @@ import matplotlib.pyplot as pl
 import optimization as opt
 import config
 import os
+from Periodogram import Periodogram
 
 
 class Dataset():
@@ -91,11 +92,32 @@ class Dataset():
             self.save_data(f"PG{len(self.freqs)}.csv", self.lcs[-1].periodogram.lsfreq, self.lcs[-1].periodogram.lsamp)
 
         return 0
+    def post(self):
+        for i in range(len(self.freqs)):
+            # adjust parameters
+            self.freqs[i].adjust_params()
+            # get significances
+            if config.sig_method == "box_avg":
+                self.freqs[i].sig = self.lcs[-1].periodogram.get_sig_boxavg(self.freqs[i].f, self.freqs[i].a)
+            elif config.sig_method == "poly":
+                self.freqs[i].sig = self.lcs[-1].periodogram.get_sig_polyfit(self.freqs[i].f, self.freqs[i].a)
+            # assign formal errors
+            self.freqs[i].assign_errors(len(self.LC0.time),
+                                        self.LC0.time[-1]-self.LC0.time[0],
+                                        np.std(self.lcs[-1].data))
+        if config.reg_plots:
+            self.lcs[-1].periodogram.plot_polyfit_log(show = False,
+                                                      savename = f"{config.working_dir}/{config.figure_subdir}/polyfig_log")
+            self.lcs[-1].periodogram.plot_polyfit_normspace(show = False,
+                                                            savename = f"{config.working_dir}/{config.figure_subdir}/polyfig_normspace")
+
+
+
     def save_results(self, f_name):
         with open(f_name, 'w') as f:
             f.write(f"Freq,Amp,Phase\n")
             for freq in self.freqs:
-                f.write(f"{freq.f},{freq.a},{freq.p}\n")
+                f.write(f"{freq.f},{freq.a},{freq.p}, {freq.f_err}, {freq.a_err}, {freq.p_err}, {freq.sig}\n")
 
     def save_sf_results(self, f_name):
         with open(f_name, 'w') as f:
