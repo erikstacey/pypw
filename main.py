@@ -65,8 +65,13 @@ def main():
     for folder in ["figures", "figures_iterative", "freq_logs", "supp_data"]:
         shutil.rmtree(folder, ignore_errors=True)
         os.makedirs(folder)
-    imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True, delimiter = config.delimiter)
-    pptime, ppdata, pperr = preprocess(imptime, impdata, imperr)
+    if len(config.cols) == 3:
+        imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True, delimiter = config.delimiter)
+    elif len(config.cols) == 2:
+        imptime, impdata = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True,
+                                              delimiter=config.delimiter)
+        imperr = np.ones(len(imptime))
+    pptime, ppdata, pperr = preprocess(imptime-config.time_offset, impdata, imperr)
     pl.plot(pptime, ppdata, color='black', marker='.', markersize=0.5, linestyle=None)
     pl.xlabel("Time [HJD]")
     pl.ylabel(f"Amplitude [{config.target_dtype}]")
@@ -79,8 +84,12 @@ def main():
         if c_code == 1:
             break
     ds.post()
+    if not config.quiet:
+        print("Saving results...")
     ds.save_results("frequencies.csv")
     ds.save_sf_results(f"{os.getcwd()}/freq_logs/SF_all.csv")
+    if not config.quiet:
+        print("Done!")
 
 
 main()

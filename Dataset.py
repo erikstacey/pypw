@@ -68,6 +68,9 @@ class Dataset():
         for freq in self.freqs:
             freq.prettyprint()
 
+        if not config.quiet:
+            print(f"Current STD of residuals: {np.std(self.lcs[-1].data)}")
+
         if config.runtime_plots:
             print("PLOTTING MULTI-FREQUENCY FIT")
             self.lcs[0].plot(show=True, color='black', model = self.total_model())
@@ -76,7 +79,8 @@ class Dataset():
 
         # save plots
         if config.plot_iterative:
-            self.lcs[-1].plot(savename=os.getcwd()+config.iterative_subdir+f"/lc{len(self.lcs)}.png", model=mf_mod)
+            self.lcs[0].plot(savename=os.getcwd()+config.iterative_subdir+f"/model_lc{len(self.lcs)}.png", model=mf_mod)
+            self.lcs[-1].plot(savename=os.getcwd() + config.iterative_subdir + f"/lc{len(self.lcs)}.png")
             self.lcs[-1].periodogram.plot(savename=os.getcwd() + config.iterative_subdir + f"/pg{len(self.lcs)}.png")
 
 
@@ -91,6 +95,8 @@ class Dataset():
             self.save_data(f"LC{len(self.freqs)}.csv", self.lcs[-1].time, self.lcs[-1].data, self.lcs[-1].err)
             self.save_data(f"PG{len(self.freqs)}.csv", self.lcs[-1].periodogram.lsfreq, self.lcs[-1].periodogram.lsamp)
 
+
+
         return 0
     def post(self):
         for i in range(len(self.freqs)):
@@ -102,7 +108,8 @@ class Dataset():
             elif config.sig_method == "poly":
                 self.freqs[i].sig = self.lcs[-1].periodogram.get_sig_polyfit(self.freqs[i].f, self.freqs[i].a)
             # assign formal errors
-            self.freqs[i].assign_errors(len(self.LC0.time),
+            N_eff = self.lcs[-1].measure_N_eff()
+            self.freqs[i].assign_errors(N_eff,
                                         self.LC0.time[-1]-self.LC0.time[0],
                                         np.std(self.lcs[-1].data))
         if config.reg_plots:

@@ -133,7 +133,7 @@ class Periodogram():
         """ This gets significance of a frequency with f=center_val_freq and A=freq_amp without considering
         a peak width - this is used to assess frequency significance after all frequencies have been identified
         using the final residual periodogram"""
-        center_i_freq = np.where(self.lsfreq == center_val_freq)[0][0]
+        center_i_freq = np.where(self.lsfreq == center_val_freq)[0]
         # find values of edge frequencies
         lower_val_freq = self.lsfreq[center_i_freq] - config.averaging_bin_radius
         upper_val_freq = self.lsfreq[center_i_freq] + config.averaging_bin_radius

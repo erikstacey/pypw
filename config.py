@@ -10,18 +10,23 @@ to False.
 """
 # ========== Main/Most relevant ==========
 version = "1.1"
-working_dir = f"C:/Users/Erik/main/projects/plaskett_photometry/hd47129_extractions_final/16cbv_testing"
+#working_dir = f"C:/Users/Erik/main/projects/plaskett_photometry/corot_simbad/"
+#target_file = "corot.tsv"
+working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_extractions_final/sig_testing/poly3"
 target_file = "HD47129_squaremask_hard_16CBV.txt"
 cols = [0, 1, 2]
 dtype = "flux"
 n_f = 25  # number of frequencies to extract
+#delimiter = ' 	  '
 delimiter = ' '
+#time_offset = 50000
+time_offset = -7000
 
 peak_selection = "bin" # can be highest, bin
 bin_highest_override = 7 # sets the number of frequencies
 averaging_bin_radius = 0.25
 cutoff_iteration = 30
-cutoff_sig = 3
+cutoff_sig = 2.4
 
 multi_fit_type = "lm"  # "anneal", "lm", "scipy". Sets fitting engine to use.
 residual_model_generation = "sf" # can be sf, mf. Controls which model is used to generate residual periodogram
@@ -29,6 +34,7 @@ boundary_warnings = 0.05
 clean_existing = True
 
 sig_method = "poly" # "poly" or "box_avg"
+poly_order = 3
 
 # ========== Preprocessing ==========
 target_dtype = "mmag"  # allowed values: mag, mmag, flux (only if data originally in flux)
@@ -53,8 +59,6 @@ freq_selection_method = "highest" # can be highest, or averaged
 
 # ========== Fitting ==========
 phase_fit_rejection_criterion = 0.1
-
-poly_order = 3
 # ========== LM ==========
 # freq bounds use coefficients
 freq_bounds_lower_coef = 0.8
