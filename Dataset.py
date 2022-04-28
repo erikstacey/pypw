@@ -5,6 +5,7 @@ import matplotlib.pyplot as pl
 import optimization as opt
 import config
 import os
+from pw_io import format_output
 from Periodogram import Periodogram
 
 
@@ -103,10 +104,9 @@ class Dataset():
             # adjust parameters
             self.freqs[i].adjust_params()
             # get significances
-            if config.sig_method == "box_avg":
-                self.freqs[i].sig = self.lcs[-1].periodogram.get_sig_boxavg(self.freqs[i].f, self.freqs[i].a)
-            elif config.sig_method == "poly":
-                self.freqs[i].sig = self.lcs[-1].periodogram.get_sig_polyfit(self.freqs[i].f, self.freqs[i].a)
+            self.freqs[i].sig_poly = self.lcs[-1].periodogram.get_sig_polyfit(self.freqs[i].f, self.freqs[i].a)
+            self.freqs[i].sig_avg = self.lcs[-1].periodogram.get_sig_boxavg(self.freqs[i].f, self.freqs[i].a)
+            self.freqs[i].sig_slf = self.lcs[-1].periodogram.get_sig_slf(self.freqs[i].f, self.freqs[i].a)
             # assign formal errors
             N_eff = self.lcs[-1].measure_N_eff()
             self.freqs[i].assign_errors(N_eff,
@@ -117,14 +117,19 @@ class Dataset():
                                                       savename = f"{config.working_dir}/{config.figure_subdir}/polyfig_log")
             self.lcs[-1].periodogram.plot_polyfit_normspace(show = False,
                                                             savename = f"{config.working_dir}/{config.figure_subdir}/polyfig_normspace")
+            self.lcs[-1].periodogram.plot_slf_noise(show=False,
+                                                    savename=f"{config.working_dir}/{config.figure_subdir}/slf_fit")
+            self.lcs[-1].periodogram.plot_slf_noise(show=False,
+                                                    savename=f"{config.working_dir}/{config.figure_subdir}/slf_fit_logy",
+                                                    logy = True)
 
 
 
     def save_results(self, f_name):
         with open(f_name, 'w') as f:
-            f.write(f"Freq,Amp,Phase\n")
+            f.write(f"Freq,Amp,Phase, Freq_err, amp_err, phase_err, sig_poly, sig_avg\n")
             for freq in self.freqs:
-                f.write(f"{freq.f},{freq.a},{freq.p}, {freq.f_err}, {freq.a_err}, {freq.p_err}, {freq.sig}\n")
+                f.write(f"{freq.f},{freq.a},{freq.p}, {freq.f_err}, {freq.a_err}, {freq.p_err}, {freq.sig_poly}, {freq.sig_avg}\n")
 
     def save_sf_results(self, f_name):
         with open(f_name, 'w') as f:
@@ -145,3 +150,15 @@ class Dataset():
                     f.write(f"{x[i]},{y[i]},{err[i]}\n")
                 else:
                     f.write(f"{x[i]},{y[i]}\n")
+
+    def save_results_latex(self, filename):
+        with open(filename, 'w') as f:
+            f.write("\\begin{table}[] \n \\begin{tabular}{llllll} \n Index & Frequency {[}c/d{]} & Amplitude {[}mmag{]} & Phase      & Significance & Notes \\\\ \n")
+            c = 1
+            for freq in self.freqs:
+                f.write(f"{c} & {format_output(freq.f, freq.f_err, 2)} & "
+                        f"{format_output(freq.a, freq.a_err, 2)} & "
+                        f"{format_output(freq.p, freq.p_err, 2)} &"
+                        f"{round(freq.sig_avg, 2)} / {round(freq.sig_poly, 2)} & \\\\ \n")
+                c+=1
+            f.write("\\end{tabular} \n \\end{table}")

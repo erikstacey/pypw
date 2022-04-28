@@ -72,5 +72,9 @@ def n_sin_min(x, y, err, *params):
     dof = len(x)-len(params)
     return chisq(y, model, err)/dof
 
+def bowman_noise_model(x, *params):
+    # params = [x0, alpha_0, gamma, Cw]
+    return params[1] / (1+(x/params[0])**params[2]) + params[3]
+
 if __name__ == "__main__":
     x = np.linspace(0,30, 10000)

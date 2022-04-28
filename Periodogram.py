@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as pl
 from scipy.optimize import curve_fit
-from models import n_model_poly
+from models import n_model_poly, bowman_noise_model
 from astropy.timeseries import LombScargle
 import config
 
@@ -36,6 +36,8 @@ class Periodogram():
         self.polyparams_log = None
         self.logx = None
         self.logy = None
+
+        self.slf_p = None
 
     def highest_ampl(self, mask=None):
         """ Return the frequency corresponding to the highest amplitude in the amplitude spectrum, and the amplitude at
@@ -133,7 +135,7 @@ class Periodogram():
         """ This gets significance of a frequency with f=center_val_freq and A=freq_amp without considering
         a peak width - this is used to assess frequency significance after all frequencies have been identified
         using the final residual periodogram"""
-        center_i_freq = np.where(self.lsfreq == center_val_freq)[0]
+        center_i_freq = self.find_index_of_freq(center_val_freq)
         # find values of edge frequencies
         lower_val_freq = self.lsfreq[center_i_freq] - config.averaging_bin_radius
         upper_val_freq = self.lsfreq[center_i_freq] + config.averaging_bin_radius
@@ -171,6 +173,36 @@ class Periodogram():
         self.polyfit = 10 ** self.polyfunc(self.logx, *p)
         print(f"Complete fit of LO poly to log log periodogram")
         print(f"params = {p}")
+
+    def fit_self_slfnoise(self):
+        p0 = [0.5, 0.5, 1, 0]
+        p, _ = curve_fit(bowman_noise_model, self.lsfreq, self.lsamp, p0)
+        self.slf_p = p
+        print(f"Completed red noise + white noise model fit ")
+        print(f"params = {p}")
+
+    def get_sig_slf(self, f, a):
+        if self.slf_p is None:
+            self.fit_self_slfnoise()
+        model_at_val = bowman_noise_model(f, *self.slf_p)
+        return a/model_at_val
+
+    def plot_slf_noise(self, show = False, savename = None, logy = False):
+        pl.plot(self.lsfreq, self.lsamp, color='black')
+        pl.plot(self.lsfreq, bowman_noise_model(self.lsfreq, *self.slf_p))
+
+        pl.xlabel("Freq. [c/d]")
+        pl.ylabel(f"Amplitude [{config.target_dtype}]")
+
+        if logy:
+            pl.yscale("log")
+
+        if savename:
+            pl.savefig(savename)
+        if show:
+            pl.show()
+            pl.clf()
+
 
     def get_polyfit_at_val(self, frequency):
         logfreq = np.log10(frequency)
