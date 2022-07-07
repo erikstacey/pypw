@@ -39,6 +39,12 @@ class Dataset():
                 sf_f_guess, sf_a_guess = c_lc.periodogram.highest_ampl()
             else:
                 sf_f_guess, sf_a_guess = c_lc.periodogram.peak_selection_w_sig()
+        elif config.peak_selection == "slf":
+            if len(self.freqs)+1 <= config.bin_highest_override:
+                sf_f_guess, sf_a_guess = c_lc.periodogram.highest_ampl()
+            else:
+                sf_f_guess, sf_a_guess = c_lc.periodogram.peak_selection_slf_fits()
+
 
         if sf_f_guess == None:
             print("STOP CRITERION TRIGGERED")
@@ -83,6 +89,8 @@ class Dataset():
             self.lcs[0].plot(savename=os.getcwd()+config.iterative_subdir+f"/model_lc{len(self.lcs)}.png", model=mf_mod)
             self.lcs[-1].plot(savename=os.getcwd() + config.iterative_subdir + f"/lc{len(self.lcs)}.png")
             self.lcs[-1].periodogram.plot(savename=os.getcwd() + config.iterative_subdir + f"/pg{len(self.lcs)}.png")
+            if config.peak_selection == "slf" and self.lcs[-1].periodogram.slf_p is not None:
+                self.lcs[-1].periodogram.plot_slf_noise(show=False, savename=os.getcwd() + config.iterative_subdir + f"/pg_slf_fit_{len(self.lcs)}.png")
 
 
         # Make residual LC
@@ -127,9 +135,9 @@ class Dataset():
 
     def save_results(self, f_name):
         with open(f_name, 'w') as f:
-            f.write(f"Freq,Amp,Phase, Freq_err, amp_err, phase_err, sig_poly, sig_avg\n")
+            f.write(f"Freq,Amp,Phase, Freq_err, amp_err, phase_err, sig_poly, sig_avg, sig_slf\n")
             for freq in self.freqs:
-                f.write(f"{freq.f},{freq.a},{freq.p}, {freq.f_err}, {freq.a_err}, {freq.p_err}, {freq.sig_poly}, {freq.sig_avg}\n")
+                f.write(f"{freq.f},{freq.a},{freq.p}, {freq.f_err}, {freq.a_err}, {freq.p_err}, {freq.sig_poly}, {freq.sig_avg}, {freq.sig_slf}\n")
 
     def save_sf_results(self, f_name):
         with open(f_name, 'w') as f:
@@ -162,3 +170,11 @@ class Dataset():
                         f"{round(freq.sig_avg, 2)} / {round(freq.sig_poly, 2)} & \\\\ \n")
                 c+=1
             f.write("\\end{tabular} \n \\end{table}")
+
+    def save_misc(self, filename):
+        with open(filename, 'w') as f:
+            f.write(f"r_polyparams_log={self.lcs[-1].periodogram.polyparams_log}\n")
+            f.write(f"r_slfparams={self.lcs[-1].periodogram.slf_p}\n")
+
+            stddevs = [np.std(lc.data) for lc in self.lcs]
+            f.write(f"std_devs={stddevs}\n")

@@ -11,7 +11,7 @@ class Freq():
         self.n = n
         self.sig_poly = None
         self.sig_avg = None
-        self.sig_bowman = None
+        self.sig_slf = None
         self.f_err = None
         self.a_err = None
         self.p_err = None

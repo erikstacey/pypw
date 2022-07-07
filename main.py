@@ -89,6 +89,7 @@ def main():
     ds.save_results("frequencies.csv")
     ds.save_sf_results(f"{os.getcwd()}/freq_logs/SF_all.csv")
     ds.save_results_latex(f"{os.getcwd()}/table.tex")
+    ds.save_misc(f"{os.getcwd()}/misc.txt")
     if not config.quiet:
         print("Done!")
 

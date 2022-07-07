@@ -9,24 +9,40 @@ to False.
 4) Run main.py
 """
 # ========== Main/Most relevant ==========
-version = "1.1"
-#working_dir = f"C:/Users/Erik/main/projects/plaskett_photometry/corot_simbad/"
-#target_file = "corot.tsv"
-working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_extractions_final/16cbv"
-target_file = "HD47129_squaremask_hard_16CBV.txt"
-cols = [0, 1, 2]
-dtype = "flux"
-n_f = 50  # number of frequencies to extract
-#delimiter = ' 	  '
-delimiter = ' '
-#time_offset = 50000
-time_offset = -7000
+dataset_to_use = "corot"
 
-peak_selection = "bin" # can be highest, bin
-bin_highest_override = 7 # sets the number of frequencies
+
+version = "1.1"
+
+if dataset_to_use == "tess":
+    working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_extractions_final/16cbv"
+    target_file = "HD47129_squaremask_hard_16CBV.txt"
+    cols = [0, 1, 2]
+    dtype = "flux"
+    delimiter = ' '
+    time_offset = -7000
+elif dataset_to_use == "corot":
+    working_dir = f"C:/Users/Erik/main/projects/plaskett_photometry/corot_simbad/"
+    target_file = "corot.tsv"
+    dtype = "flux"
+    cols = [0, 1]
+    delimiter = ' 	  '
+    time_offset = 50000
+
+
+
+
+n_f = 50  # number of frequencies to extract
+
+
+
+
+
+peak_selection = "slf" # can be highest, bin, slf
+bin_highest_override = 12 # sets the number of frequencies
 averaging_bin_radius = 0.25
-cutoff_iteration = 30
-cutoff_sig = 2.4
+cutoff_iteration = 50
+cutoff_sig = 3
 
 multi_fit_type = "lm"  # "anneal", "lm", "scipy". Sets fitting engine to use.
 residual_model_generation = "sf" # can be sf, mf. Controls which model is used to generate residual periodogram
@@ -72,7 +88,7 @@ phase_bounds_upper = 100
 
 # ========== Periodograms ==========
 periodograms_lowerbound = "resolution"  # can be set to resolution or explicit value in c/d
-periodograms_upperbound = 20
+periodograms_upperbound = 10
 
 # ========== Plots ==========
 
@@ -81,6 +97,11 @@ reg_plots = True
 iterative_subdir = "/figures_iterative"
 plot_iterative = True
 runtime_plots = False  # shows stuff as the program is running for debugging purposes
+
+# ========== Periodograms ====
+pg_x_axis_label = "Frequency [c/d]"
+pg_y_axis_label = f"Amplitude [{target_dtype}]"
+pg_xlim = [0, 5]
 
 # ========== Dual Annealing ==========
 frequencies_da_filename = "frequencies_da.csv"

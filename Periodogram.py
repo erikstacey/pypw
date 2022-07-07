@@ -66,6 +66,8 @@ class Periodogram():
                 right_i = center + count - 1
         if left_i < 0:  # ensure no wraparound
             left_i = 0
+            if right_i > len(self.lsfreq):
+                left_i = len(self.lsfreq)
         return left_i, right_i
 
     def find_index_of_freq(self, t):
@@ -164,6 +166,29 @@ class Periodogram():
                     cur_mask[i] = False
         return None, None
 
+    def peak_selection_slf_fits(self):
+        # set up slf noise fit
+        if self.slf_p is None:
+            self.fit_self_slfnoise()
+        if config.plot_iterative:
+            self.plot_slf_noise(show=False, savename = f"")
+        cur_mask = np.ones(len(self.lsfreq), dtype=bool)
+        count = 0
+        while count < config.cutoff_iteration:
+            c_max_freq, c_max_amp = self.highest_ampl(mask=cur_mask)
+            if not config.quiet:
+                print(f"Identified peak at f={c_max_freq:.3f} : a={c_max_amp:.3f}")
+            c_sig = c_max_amp/bowman_noise_model(c_max_freq, *self.slf_p)
+            if c_sig > config.cutoff_sig:
+                print(f"Accepted frequency - sig of {c_sig:.3f} < {config.cutoff_sig} ({count})")
+                return c_max_freq, c_max_amp
+            else:
+                print(f"Rejected frequency - sig of {c_sig:.3f} < {config.cutoff_sig} ({count})")
+                trough_left_i, trough_right_i = self.find_troughs(self.find_index_of_freq(c_max_freq))
+                cur_mask[trough_left_i:trough_right_i] = False
+                count+=1
+        return None, None
+
     def fit_self_lopoly(self):
         p0 = [0] * config.poly_order
         self.logx = np.log10(self.lsfreq)
@@ -191,8 +216,9 @@ class Periodogram():
         pl.plot(self.lsfreq, self.lsamp, color='black')
         pl.plot(self.lsfreq, bowman_noise_model(self.lsfreq, *self.slf_p))
 
-        pl.xlabel("Freq. [c/d]")
-        pl.ylabel(f"Amplitude [{config.target_dtype}]")
+        pl.xlabel(config.pg_x_axis_label)
+        pl.ylabel(config.pg_y_axis_label)
+        pl.xlim(*config.pg_xlim)
 
         if logy:
             pl.yscale("log")
@@ -201,7 +227,7 @@ class Periodogram():
             pl.savefig(savename)
         if show:
             pl.show()
-            pl.clf()
+        pl.clf()
 
 
     def get_polyfit_at_val(self, frequency):
@@ -212,8 +238,8 @@ class Periodogram():
     def plot_polyfit_log(self, show=False, savename=None):
         pl.plot(self.logx, self.logy, color='black', label='data')
         pl.plot(self.logx, self.polyfunc(self.logx, *self.polyparams_log), color='red', label='order 3 poly fit')
-        pl.xlabel("Freq [c/d]")
-        pl.ylabel(f"log(Amp [{config.target_dtype}])")
+        pl.xlabel(f"log({config.pg_x_axis_label})")
+        pl.ylabel(f"log({config.pg_y_axis_label})")
         if savename:
             pl.savefig(savename)
         if show:
@@ -229,8 +255,9 @@ class Periodogram():
         pl.plot(self.lsfreq, self.lsamp, color='black', label='data')
         pl.plot(self.lsfreq, self.polyfit, color='red', label='fit')
         pl.legend()
-        pl.xlabel("Freq [c/d]")
-        pl.ylabel(f"Amp [{config.target_dtype}]")
+        pl.xlabel(config.pg_x_axis_label)
+        pl.ylabel(config.pg_y_axis_label)
+        pl.xlim(*config.pg_xlim)
         if savename:
             pl.savefig(savename)
         if show:
@@ -239,8 +266,8 @@ class Periodogram():
 
     def plot(self, xlim=(0, 8), vline=None, show=False, savename=None):
         pl.plot(self.lsfreq, self.lsamp, color='black')
-        pl.xlabel("Frequency [c/d]")
-        pl.ylabel(f"Amplitude [{config.target_dtype}]")
+        pl.xlabel(config.pg_x_axis_label)
+        pl.ylabel(config.pg_y_axis_label)
         pl.xlim(*xlim)
         if vline is not None:
             pl.axvline(vline, color='red')
