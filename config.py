@@ -14,29 +14,14 @@ dataset_to_use = "corot"
 
 version = "1.1"
 
-if dataset_to_use == "tess":
-    working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_extractions_final/16cbv"
-    target_file = "HD47129_squaremask_hard_16CBV.txt"
-    cols = [0, 1, 2]
-    dtype = "flux"
-    delimiter = ' '
-    time_offset = -7000
-elif dataset_to_use == "corot":
-    working_dir = f"C:/Users/Erik/main/projects/plaskett_photometry/corot_simbad/"
-    target_file = "corot.tsv"
-    dtype = "flux"
-    cols = [0, 1]
-    delimiter = ' 	  '
-    time_offset = 50000
-
-
-
+working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_analysis_for_thesis/pdc"
+target_file = "HD47129_thresh9_lc.txt"
+cols = [0, 1, 2]
+dtype = "flux"
+delimiter = ' '
+time_offset = -7000
 
 n_f = 50  # number of frequencies to extract
-
-
-
-
 
 peak_selection = "slf" # can be highest, bin, slf
 bin_highest_override = 12 # sets the number of frequencies
