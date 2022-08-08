@@ -198,8 +198,9 @@ class Periodogram():
         print(f"params = {p}")
 
     def fit_self_slfnoise(self):
-        p0 = [0.5, 0.5, 1, 0]
-        p, _ = curve_fit(bowman_noise_model, self.lsfreq, self.lsamp, p0)
+        p0 = [0.5, np.mean(self.lsamp), 0.5, 0]
+
+        p, _ = curve_fit(bowman_noise_model,xdata=self.lsfreq, ydata=self.lsamp, p0=p0)
         self.slf_p = p
         print(f"Completed red noise + white noise model fit ")
         print(f"params = {p}")

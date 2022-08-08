@@ -89,6 +89,7 @@ class Dataset():
             self.freqs[i].assign_errors(N_eff,
                                         self.LC0.time[-1]-self.LC0.time[0],
                                         np.std(self.lcs[-1].data))
+        self.output_handler.post_pw(self.lcs, self.freqs)
 
     def total_model(self):
         model = np.zeros(len(self.LC0.time))

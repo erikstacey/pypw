@@ -81,7 +81,7 @@ class OutputHandler():
         pl.savefig(f"{self.lcs_mf_output}/lc_mf{n}.png")
         pl.clf()
 
-        # ================= LC PLOTS ===================
+        # ================= PG PLOTS ===================
         # regular ======================================
         self.plot_pg(x=c_pg.lsfreq, y=c_pg.lsamp, label="Data")
         self.format_pg()
@@ -91,19 +91,29 @@ class OutputHandler():
         if c_pg.slf_p is not None:
             self.plot_pg(x=c_pg.lsfreq, y=c_pg.lsamp, label="Data")
             self.plot_pg(x=c_pg.lsfreq, y=c_pg.get_slf_model(c_pg.lsfreq), color="red", label="SLF Fit")
-            self.format_pg()
+            self.plot_pg(x=c_pg.lsfreq, y=c_pg.get_slf_model(c_pg.lsfreq) * config.cutoff_sig,
+                         color="blue", label="Minimum Selection Amplitude", linestyle="--")
+            self.format_pg(legend=True)
             pl.savefig(f"{self.pgs_slf_output}/pg{n}.png")
             pl.clf()
         # lopoly =======================================
         if c_pg.polyparams_log is not None:
             self.plot_pg(x=c_pg.lsfreq, y=c_pg.lsamp, label="Data")
             self.plot_pg(x=c_pg.lsfreq, y=c_pg.get_polyfit_model(c_pg.lsfreq), color="red", label="LOPoly Fit")
-            self.format_pg()
+            self.format_pg(legend=True)
             pl.savefig(f"{self.pgs_lopoly_output}/pg{n}.png")
             pl.clf()
 
     def post_pw(self, lcs, freqs):
         self.save_freqs(freqs, f"{self.main_dir}/{config.frequencies_fname}")
+        # save last LC and PG
+        self.plot_lc(lcs[-1].time, lcs[-1].data)
+        pl.savefig(f"{self.main_dir}/residual_lc.png")
+        pl.clf()
+
+        self.plot_pg(lcs[-1].periodogram.lsfreq, lcs[-1].periodogram.lsamp)
+        pl.savefig(f"{self.main_dir}/residual_pg.png")
+        pl.clf()
 
     def plot_lc(self, x, y, color="black", marker=".", alpha=1.0, linestyle="none", label="", markersize = 1):
         if config.output_in_mmag:
@@ -119,13 +129,13 @@ class OutputHandler():
         if legend:
             pl.legend()
 
-    def plot_pg(self, x, y, color="black", alpha=1.0, label=""):
+    def plot_pg(self, x, y, color="black", alpha=1.0, label="", linestyle = "-"):
         if config.output_in_mmag:
             pl.plot(x, -flux2mag(y, self.rflux)*1000,
-                    color=color, alpha=alpha, label=label)
+                    color=color, alpha=alpha, label=label, linestyle = linestyle)
         else:
             pl.plot(x, y,
-                    color=color, alpha=alpha, label=label)
+                    color=color, alpha=alpha, label=label, linestyle=linestyle)
 
     def format_pg(self, legend=False):
         pl.xlabel(config.pg_xlabel)
@@ -152,14 +162,14 @@ class OutputHandler():
 
     def save_freqs(self, freqs, path):
         with open(path, "w") as f:
-            f.write(f"Freq,Amp,Phase,Freq_err,Amp_err,Sig_slf,Sig_lopoly,Sig_avg")
+            f.write(f"Freq,Amp,Phase,Freq_err,Amp_err,Sig_slf,Sig_lopoly,Sig_avg\n")
             if config.output_in_mmag:
                 for freq in freqs:
                     am, a_errm, pm, _, _ = self.get_freq_params_in_mmag(freq)
-                    f.write(f"{freq.f},{am},{pm},{freq.f_err},{a_errm},{freq.p_err},{freq.sig_slf},{freq.sig_poly},{freq.sig_avg}")
+                    f.write(f"{freq.f},{am},{pm},{freq.f_err},{a_errm},{freq.p_err},{freq.sig_slf},{freq.sig_poly},{freq.sig_avg}\n")
             else:
                 for freq in freqs:
-                    f.write(f"{freq.f},{freq.a},{freq.m},{freq.f_err},{freq.a_err},{freq.p_err},{freq.sig_slf},{freq.sig_poly},{freq.sig_avg}")
+                    f.write(f"{freq.f},{freq.a},{freq.m},{freq.f_err},{freq.a_err},{freq.p_err},{freq.sig_slf},{freq.sig_poly},{freq.sig_avg}\n")
 
 
 

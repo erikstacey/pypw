@@ -12,7 +12,7 @@ to False.
 dataset_to_use = "corot"
 
 
-version = "1.1"
+version = "2.0"
 
 working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_analysis_for_thesis/pdc"
 target_file = "HD47129_thresh9_lc.txt"
@@ -28,7 +28,7 @@ peak_selection = "slf" # can be highest, bin, slf
 bin_highest_override = 10 # sets the number of frequencies
 averaging_bin_radius = 0.25
 cutoff_iteration = 50
-cutoff_sig = 3
+cutoff_sig = 2.5
 
 multi_fit_type = "lm"  # "anneal", "lm", "scipy". Sets fitting engine to use.
 residual_model_generation = "sf" # can be sf, mf. Controls which model is used to generate residual periodogram
