@@ -2,6 +2,13 @@ import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as pl
 
+def flux2mag(data, ref):
+        return -2.5*(np.log10(data+ref) -np.log10(ref))
+def flux2mag_e(data, ref, err):
+    mag = -2.5*(np.log10(data+ref) -np.log10(ref))
+    mag_err = abs(-2.5 * err / ((data + ref) * np.log(10)))
+    return mag, mag_err
+
 def chisq(data, model, err):
     return sum(((data-model)/err)**2)
 

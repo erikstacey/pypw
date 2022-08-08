@@ -39,6 +39,9 @@ class Freq():
     def genmodel(self, time):
         return sin_model(time, self.f, self.a, self.p)
 
+    def genmodel_sf(self, time):
+        return sin_model(time, self.f0, self.a0, self.p0)
+
     def adjust_params(self):
         pass
         # adjust amplitude
@@ -55,8 +58,3 @@ class Freq():
         self.f_err = (6 / N) ** 0.5 * sigmaresiduals / (np.pi * T * self.a)
         self.a_err = (2 / N) ** 0.5 * sigmaresiduals
         self.p_err = (2 / N) ** 0.5 * sigmaresiduals / self.a
-
-    def diag_plot(self, x, show=True, color='red'):
-        pl.plot(x, self.genmodel(x), color=color)
-        if show:
-            pl.show()

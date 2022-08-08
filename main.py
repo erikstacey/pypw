@@ -19,7 +19,7 @@ OUTPUTS:
     "frequencies.csv": the final list of frequency results
 
 Author: Erik Stacey
-Most recently updated Aug 25, 2021
+Most recently updated Aug 08 2022
 Contact information:
 Email: erik@erikstacey.com
 Alternative : erikwstacey@gmail.com
@@ -62,22 +62,20 @@ def main():
     # todo: use low snr cutoff and high iteration cutoff to extract lots of frequencies. Then assess them individually.
     save_config("configlog.txt")
     os.chdir(config.working_dir)
-    for folder in ["figures", "figures_iterative", "freq_logs", "supp_data"]:
-        shutil.rmtree(folder, ignore_errors=True)
-        os.makedirs(folder)
     if len(config.cols) == 3:
         imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True, delimiter = config.delimiter)
     elif len(config.cols) == 2:
         imptime, impdata = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True,
                                               delimiter=config.delimiter)
         imperr = np.ones(len(imptime))
-    pptime, ppdata, pperr = preprocess(imptime-config.time_offset, impdata, imperr)
+    pptime, ppdata, pperr, ref_flux = preprocess(imptime-config.time_offset, impdata, imperr)
+    print(f"Reference flux set to: {ref_flux}")
     pl.plot(pptime, ppdata, color='black', marker='.', markersize=0.5, linestyle=None)
     pl.xlabel("Time [HJD]")
     pl.ylabel(f"Amplitude [{config.target_dtype}]")
     pl.show()
 
-    ds = Dataset(pptime, ppdata, pperr)
+    ds = Dataset(pptime, ppdata, pperr, reference_flux=ref_flux)
 
     while len(ds.freqs) < config.n_f:
         c_code = ds.it_pw()
@@ -86,10 +84,6 @@ def main():
     ds.post()
     if not config.quiet:
         print("Saving results...")
-    ds.save_results("frequencies.csv")
-    ds.save_sf_results(f"{os.getcwd()}/freq_logs/SF_all.csv")
-    ds.save_results_latex(f"{os.getcwd()}/table.tex")
-    ds.save_misc(f"{os.getcwd()}/misc.txt")
     if not config.quiet:
         print("Done!")
 

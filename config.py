@@ -20,11 +20,12 @@ cols = [0, 1, 2]
 dtype = "flux"
 delimiter = ' '
 time_offset = -7000
+time_unit = "BJD"
 
 n_f = 50  # number of frequencies to extract
 
 peak_selection = "slf" # can be highest, bin, slf
-bin_highest_override = 12 # sets the number of frequencies
+bin_highest_override = 10 # sets the number of frequencies
 averaging_bin_radius = 0.25
 cutoff_iteration = 50
 cutoff_sig = 3
@@ -38,24 +39,38 @@ sig_method = "poly" # "poly" or "box_avg"
 poly_order = 3
 
 # ========== Preprocessing ==========
-target_dtype = "mmag"  # allowed values: mag, mmag, flux (only if data originally in flux)
+target_dtype = "flux"  # allowed values: mag, mmag, flux (only if data originally in flux)
 strip_gaps = True
 gap_size = 0.5  # days
 strip_gaps_points = 50  # on either side of each gap, and at the start and end
-# ========== Logging ==========
-log_fname = "log.txt"
-save_freq_logs = True
-freqlog_folder = "freq_logs"
 
 # ========== Console ==========
 quiet = False
 
-# ========== Output targets ==========
-preprocessed_lightcurve_fname = "inp_lc.dat"
+# ========== Output Handler Settings ==========
+output_in_mmag = True
+
+main_output = "results"
+lcs_output = "lightcurves"
+pgs_output = "periodograms"
+misc_output = "supplemental"
+
+lc_xlabel = f"Time {time_unit}"
+pg_xlabel = "Frequency [c/d]"
+if output_in_mmag:
+    lc_ylabel = f"Flux [mmag]"
+    pg_ylabel = "Amplitude [mmag]"
+else:
+    lc_ylabel = f"Flux [{target_dtype}]"
+    pg_ylabel = f"Amplitude [{target_dtype}]"
+
+preprocessed_lightcurve_fname = "pp_lc.csv"
 frequencies_fname = "frequencies.csv"
 save_supp_data = True
+
+
+
 # ========== Frequency Selection ==========
-# TODO: implement LOPOLY fit for freq selection+rejection by significance
 freq_selection_method = "highest" # can be highest, or averaged
 
 # ========== Fitting ==========
@@ -75,13 +90,6 @@ phase_bounds_upper = 100
 periodograms_lowerbound = "resolution"  # can be set to resolution or explicit value in c/d
 periodograms_upperbound = 10
 
-# ========== Plots ==========
-
-figure_subdir = "/figures"
-reg_plots = True
-iterative_subdir = "/figures_iterative"
-plot_iterative = True
-runtime_plots = False  # shows stuff as the program is running for debugging purposes
 
 # ========== Periodograms ====
 pg_x_axis_label = "Frequency [c/d]"

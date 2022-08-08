@@ -35,11 +35,19 @@ def preprocess(time0, data0, err0):
     time, data, err = time0, data0, err0
     if config.strip_gaps:
         time, data, err = stripgaps(time, data, err, config.gap_size, config.strip_gaps_points)
+
+    if config.output_in_mmag and config.target_dtype != "mmag":
+        if config.target_dtype == "flux" and config.dtype == "flux":
+            datamean = np.mean(data)
+            return time, data-datamean, err, datamean
+        else:
+            print("Can only convert outputs to mmag if data is in flux - check target_dtype and dtype")
+
     if config.target_dtype == "flux" and config.target_dtype != config.dtype:
         print("Program incapable of converting something else to flux at the moment")
         quit()
     elif config.target_dtype == config.dtype:
-        return time, data-np.mean(data), err
+        return time, data-np.mean(data), err, None
     elif config.target_dtype == "mag" and config.dtype == "flux":
         if not config.quiet:
             print("Successfully converted data from flux to mag")
@@ -56,7 +64,7 @@ def preprocess(time0, data0, err0):
     else:
         print("Could not figure out how to convert to target data type")
         quit()
-    return time, data-np.mean(data), err
+    return time, data-np.mean(data), err, None
 
 
 if __name__ == "__main__":

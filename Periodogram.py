@@ -170,8 +170,6 @@ class Periodogram():
         # set up slf noise fit
         if self.slf_p is None:
             self.fit_self_slfnoise()
-        if config.plot_iterative:
-            self.plot_slf_noise(show=False, savename = f"")
         cur_mask = np.ones(len(self.lsfreq), dtype=bool)
         count = 0
         while count < config.cutoff_iteration:
@@ -212,68 +210,22 @@ class Periodogram():
         model_at_val = bowman_noise_model(f, *self.slf_p)
         return a/model_at_val
 
-    def plot_slf_noise(self, show = False, savename = None, logy = False):
-        pl.plot(self.lsfreq, self.lsamp, color='black')
-        pl.plot(self.lsfreq, bowman_noise_model(self.lsfreq, *self.slf_p))
+    def get_slf_model(self, x):
+        return bowman_noise_model(x, *self.slf_p)
 
-        pl.xlabel(config.pg_x_axis_label)
-        pl.ylabel(config.pg_y_axis_label)
-        pl.xlim(*config.pg_xlim)
-
-        if logy:
-            pl.yscale("log")
-
-        if savename:
-            pl.savefig(savename)
-        if show:
-            pl.show()
-        pl.clf()
-
+    def get_polyfit_model(self, x):
+        return 10**self.polyfunc(np.log10(x), *self.polyparams_log)
+    def get_polyfit_model_log(self, x):
+        return np.log10(x), self.polyfunc(np.log10(x), *self.polyparams_log)
 
     def get_polyfit_at_val(self, frequency):
         logfreq = np.log10(frequency)
         logval = self.polyfunc(logfreq, *self.polyparams_log)
         return 10 ** logval
 
-    def plot_polyfit_log(self, show=False, savename=None):
-        pl.plot(self.logx, self.logy, color='black', label='data')
-        pl.plot(self.logx, self.polyfunc(self.logx, *self.polyparams_log), color='red', label='order 3 poly fit')
-        pl.xlabel(f"log({config.pg_x_axis_label})")
-        pl.ylabel(f"log({config.pg_y_axis_label})")
-        if savename:
-            pl.savefig(savename)
-        if show:
-            pl.show()
-        pl.clf()
+
 
     def get_sig_polyfit(self, center_val_freq, freq_amp):
         if self.polyparams_log is None:
             self.fit_self_lopoly()
         return freq_amp / self.get_polyfit_at_val(center_val_freq)
-
-    def plot_polyfit_normspace(self, show=False, savename=None):
-        pl.plot(self.lsfreq, self.lsamp, color='black', label='data')
-        pl.plot(self.lsfreq, self.polyfit, color='red', label='fit')
-        pl.legend()
-        pl.xlabel(config.pg_x_axis_label)
-        pl.ylabel(config.pg_y_axis_label)
-        pl.xlim(*config.pg_xlim)
-        if savename:
-            pl.savefig(savename)
-        if show:
-            pl.show()
-        pl.clf()
-
-    def plot(self, xlim=(0, 8), vline=None, show=False, savename=None):
-        pl.plot(self.lsfreq, self.lsamp, color='black')
-        pl.xlabel(config.pg_x_axis_label)
-        pl.ylabel(config.pg_y_axis_label)
-        pl.xlim(*xlim)
-        if vline is not None:
-            pl.axvline(vline, color='red')
-        if show:
-            pl.show()
-            pl.clf()
-        elif savename:
-            pl.savefig(savename)
-            pl.clf()
