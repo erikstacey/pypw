@@ -2,6 +2,7 @@ import config
 import os
 import shutil
 import numpy as np
+from pw_io import format_output
 
 import matplotlib.pyplot as pl
 from models import flux2mag, flux2mag_e
@@ -115,6 +116,8 @@ class OutputHandler():
         pl.savefig(f"{self.main_dir}/residual_pg.png")
         pl.clf()
 
+        self.save_latex_table(freqs, f"{self.main_dir}/freqtable.tex")
+
     def plot_lc(self, x, y, color="black", marker=".", alpha=1.0, linestyle="none", label="", markersize = 1):
         if config.output_in_mmag:
             pl.plot(x, flux2mag(y, self.rflux)*1000,
@@ -171,7 +174,12 @@ class OutputHandler():
                 for freq in freqs:
                     f.write(f"{freq.f},{freq.a},{freq.m},{freq.f_err},{freq.a_err},{freq.p_err},{freq.sig_slf},{freq.sig_poly},{freq.sig_avg}\n")
 
-
+    def save_latex_table(self, freqs, path):
+        with open(path, "w") as f:
+            for freq in freqs:
+                f.write(f"{freq.n+1} & {format_output(freq.f, freq.f_err, 2)} & {format_output(freq.a, freq.a_err, 2)} &"
+                        f" {format_output(freq.p, freq.p_err, 2)} & {round(freq.sig_slf,2)} & {round(freq.sig_avg, 2)} &"
+                        f"\\\\ \\hline \n")
 
     def save_lc(self, lightcurve, path):
         np.savetxt(path, X=[lightcurve.time, lightcurve.data, lightcurve.err], delimiter=",")

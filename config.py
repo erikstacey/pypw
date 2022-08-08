@@ -26,7 +26,7 @@ n_f = 50  # number of frequencies to extract
 
 peak_selection = "slf" # can be highest, bin, slf
 bin_highest_override = 10 # sets the number of frequencies
-averaging_bin_radius = 0.25
+averaging_bin_radius = 0.5
 cutoff_iteration = 50
 cutoff_sig = 2.5
 
@@ -88,7 +88,7 @@ phase_bounds_upper = 100
 
 # ========== Periodograms ==========
 periodograms_lowerbound = "resolution"  # can be set to resolution or explicit value in c/d
-periodograms_upperbound = 10
+periodograms_upperbound = 20
 
 
 # ========== Periodograms ====
