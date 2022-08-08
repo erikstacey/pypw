@@ -28,7 +28,7 @@ peak_selection = "slf" # can be highest, bin, slf
 bin_highest_override = 10 # sets the number of frequencies
 averaging_bin_radius = 0.5
 cutoff_iteration = 50
-cutoff_sig = 2.5
+cutoff_sig = 3.0
 
 multi_fit_type = "lm"  # "anneal", "lm", "scipy". Sets fitting engine to use.
 residual_model_generation = "sf" # can be sf, mf. Controls which model is used to generate residual periodogram
@@ -88,7 +88,7 @@ phase_bounds_upper = 100
 
 # ========== Periodograms ==========
 periodograms_lowerbound = "resolution"  # can be set to resolution or explicit value in c/d
-periodograms_upperbound = 20
+periodograms_upperbound = 10
 
 
 # ========== Periodograms ====

@@ -177,8 +177,10 @@ class OutputHandler():
     def save_latex_table(self, freqs, path):
         with open(path, "w") as f:
             for freq in freqs:
-                f.write(f"{freq.n+1} & {format_output(freq.f, freq.f_err, 2)} & {format_output(freq.a, freq.a_err, 2)} &"
-                        f" {format_output(freq.p, freq.p_err, 2)} & {round(freq.sig_slf,2)} & {round(freq.sig_avg, 2)} &"
+                am, a_errm, pm, _, _ = self.get_freq_params_in_mmag(freq)
+
+                f.write(f"{freq.n+1} & {format_output(freq.f, freq.f_err, 2)} & {format_output(am, a_errm, 2)} &"
+                        f" {format_output(pm, freq.p_err, 2)} & {round(freq.sig_slf,2)} & {round(freq.sig_avg, 2)} &"
                         f"\\\\ \\hline \n")
 
     def save_lc(self, lightcurve, path):

@@ -166,7 +166,7 @@ class Periodogram():
                     cur_mask[i] = False
         return None, None
 
-    def peak_selection_slf_fits(self):
+    def peak_selection_slf_fits_old(self):
         # set up slf noise fit
         if self.slf_p is None:
             self.fit_self_slfnoise()
@@ -186,6 +186,23 @@ class Periodogram():
                 cur_mask[trough_left_i:trough_right_i] = False
                 count+=1
         return None, None
+
+    def peak_selection_slf_fits(self):
+        # set up slf noise fit
+        if self.slf_p is None:
+            self.fit_self_slfnoise()
+        max_a = 0
+        cor_f = 0
+        for i in range(len(self.lsfreq)):
+            if self.lsamp[i] > max_a and self.lsamp[i] > config.cutoff_sig * bowman_noise_model(self.lsfreq[i], *self.slf_p):
+                max_a = self.lsamp[i]
+                cor_f = self.lsfreq[i]
+        if max_a == 0:
+            print("Frequency not found - Terminating analysis")
+            return None, None
+        else:
+            print(f"Highest frequency above the SLF fit is {cor_f} (A={max_a:.2f}, sig = {max_a/bowman_noise_model(cor_f, *self.slf_p):.2f})")
+            return cor_f, max_a
 
     def fit_self_lopoly(self):
         p0 = [0] * config.poly_order
