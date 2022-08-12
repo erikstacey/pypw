@@ -19,7 +19,7 @@ class Freq():
         self.f0 = freq
         self.a0 = amp
         self.p0 = phi
-        self.adjust_params()
+        #self.adjust_params()
 
     def update(self, newfreq, newamp, newphase):
         self.f, self.a, self.p = newfreq, newamp, newphase
@@ -52,9 +52,22 @@ class Freq():
         if self.p > 1 or self.p < 0:
             self.p = self.p % 1
 
-        self.f0_adjusted, self.a0_adjusted, self.p0_adjusted = self.f, self.a, self.p
+        #self.f0_adjusted, self.a0_adjusted, self.p0_adjusted = self.f, self.a, self.p
 
     def assign_errors(self, N, T, sigmaresiduals):
         self.f_err = (6 / N) ** 0.5 * sigmaresiduals / (np.pi * T * self.a)
         self.a_err = (2 / N) ** 0.5 * sigmaresiduals
         self.p_err = (2 / N) ** 0.5 * sigmaresiduals / self.a
+
+if __name__ == "__main__":
+    test_x = np.linspace(0, 10, 1000)
+    test_freq = 1
+    test_amp = 5
+    test_phi = 0.12
+    test_freq_obj = Freq(freq = test_freq, amp = test_amp, phi = test_phi, n=0)
+    pl.plot(test_x, sin_model(test_x, test_freq_obj.f, test_freq_obj.a, test_freq_obj.p))
+    print(test_freq_obj.f, test_freq_obj.a, test_freq_obj.p)
+    test_freq_obj.adjust_params()
+    pl.plot(test_x, sin_model(test_x, test_freq_obj.f, test_freq_obj.a, test_freq_obj.p))
+    print(test_freq_obj.f, test_freq_obj.a, test_freq_obj.p)
+    pl.show()

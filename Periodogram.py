@@ -38,6 +38,7 @@ class Periodogram():
         self.logy = None
 
         self.slf_p = None
+        self.slf_p_err = None
 
     def highest_ampl(self, mask=None):
         """ Return the frequency corresponding to the highest amplitude in the amplitude spectrum, and the amplitude at
@@ -117,20 +118,6 @@ class Periodogram():
             print(
                 f"\tAveraged from {lower_val_freq:.3f}:{self.lsfreq[trough_left_i]:.3f} and {self.lsfreq[trough_right_i]:.3f}:{upper_val_freq:.3f}")
             print(f"\tYielded avg = {avg_regions_avg:.3f} ||| Nom. Freq. amp = {self.lsamp[center_i_freq]:.3f}")
-        if config.runtime_plots:
-            pl.plot(self.lsfreq, self.lsamp, color='black')
-            pl.plot(self.lsfreq[lower_i_freq:trough_left_i], lower_avg_region, color='orange')
-            pl.plot(self.lsfreq[trough_right_i:upper_i_freq], upper_avg_region, color='orange')
-            pl.axvline(lower_val_freq, color='blue')
-            pl.axvline(upper_val_freq, color='blue')
-            pl.axvline(self.lsfreq[trough_left_i], color='red')
-            pl.axvline(self.lsfreq[trough_right_i], color='red')
-            pl.axvline(center_val_freq, color='black', linestyle='--')
-            pl.xlim(0, 4)
-            pl.ylim(0, 20)
-            pl.show()
-            pl.clf()
-
         return freq_amp / avg_regions_avg, trough_left_i, trough_right_i
 
     def get_sig_boxavg(self, center_val_freq, freq_amp):
@@ -187,7 +174,8 @@ class Periodogram():
                 count+=1
         return None, None
 
-    def peak_selection_slf_fits(self):
+    def peak_selection_slf_fits(self, freqs):
+        freq_values = np.array([freq.f for freq in freqs])
         # set up slf noise fit
         if self.slf_p is None:
             self.fit_self_slfnoise()
@@ -195,8 +183,13 @@ class Periodogram():
         cor_f = 0
         for i in range(len(self.lsfreq)):
             if self.lsamp[i] > max_a and self.lsamp[i] > config.cutoff_sig * bowman_noise_model(self.lsfreq[i], *self.slf_p):
-                max_a = self.lsamp[i]
-                cor_f = self.lsfreq[i]
+                if config.prevent_frequencies_within_resolution and np.all(abs(freq_values - self.lsfreq[i]) > self.resolution):
+                    max_a = self.lsamp[i]
+                    cor_f = self.lsfreq[i]
+                else:
+                    max_a = self.lsamp[i]
+                    cor_f = self.lsfreq[i]
+
         if max_a == 0:
             print("Frequency not found - Terminating analysis")
             return None, None
@@ -217,8 +210,9 @@ class Periodogram():
     def fit_self_slfnoise(self):
         p0 = [0.5, np.mean(self.lsamp), 0.5, 0]
 
-        p, _ = curve_fit(bowman_noise_model,xdata=self.lsfreq, ydata=self.lsamp, p0=p0)
+        p, covar = curve_fit(bowman_noise_model,xdata=self.lsfreq, ydata=self.lsamp, p0=p0)
         self.slf_p = p
+        self.slf_p_err = np.array([covar[i,i] for i in range(len(p))])
         print(f"Completed red noise + white noise model fit ")
         print(f"params = {p}")
 

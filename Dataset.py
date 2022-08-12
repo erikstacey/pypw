@@ -13,6 +13,7 @@ from output_handler import OutputHandler
 class Dataset():
     def __init__(self, time, data, err, reference_flux = None):
         self.time = time
+
         self.data = data
         self.err = err
         self.LC0 = Lightcurve(time=time, data=data, err=err)
@@ -22,13 +23,14 @@ class Dataset():
 
         self.output_handler = OutputHandler(LC0 = self.LC0, reference_flux = reference_flux)
 
+        self.c_zp = 0
 
-
+        print(f"Dataset loaded with n={len(time)} and deltaT = {time[-1]-time[0]}")
 
     def it_pw(self):
         print(f"\n\n\t\t ===== ITERATION {len(self.freqs)+1} =====")
         # do single-frequency fit
-        print(f"SF Fit:")
+        print("Identifying Frequency...")
         c_lc = self.lcs[-1]
         if config.peak_selection == "highest":
             sf_f_guess, sf_a_guess = c_lc.periodogram.highest_ampl()
@@ -41,10 +43,11 @@ class Dataset():
             if len(self.freqs)+1 <= config.bin_highest_override:
                 sf_f_guess, sf_a_guess = c_lc.periodogram.highest_ampl()
             else:
-                sf_f_guess, sf_a_guess = c_lc.periodogram.peak_selection_slf_fits()
+                sf_f_guess, sf_a_guess = c_lc.periodogram.peak_selection_slf_fits(self.freqs)
         if sf_f_guess == None:
             print("STOP CRITERION TRIGGERED")
             return 1
+        print(f"SF Fit:")
         sf_p_guess = 0.5
         while True:
             sf_f, sf_a, sf_p, sf_mod = opt.sf_opt_lm(c_lc.time, c_lc.data, c_lc.err, f0=sf_f_guess, a0 = sf_a_guess, p0=sf_p_guess)
@@ -58,12 +61,13 @@ class Dataset():
         self.freqs.append(Freq(sf_f, sf_a, sf_p, len(self.freqs)))
         self.freqs[-1].prettyprint()
         # do multi-frequency fit
-        mf_mod = opt.mf_opt_lm(self.LC0.time, self.LC0.data, self.LC0.err, self.freqs)
+        print("MF Free Frequency:")
+        mf_mod, self.c_zp = opt.mf_opt_lm(self.LC0.time, self.LC0.data, self.LC0.err, self.freqs, self.c_zp)
         print(f"MF Fit:")
         for freq in self.freqs:
             freq.prettyprint()
 
-        self.output_handler.save_it(self.lcs, self.freqs)
+        self.output_handler.save_it(self.lcs, self.freqs, self.c_zp)
         if not config.quiet:
             print(f"Current STD of residuals: {np.std(self.lcs[-1].data)}")
         # Make residual LC
@@ -77,6 +81,7 @@ class Dataset():
 
         return 0
     def post(self):
+        print(f"Final ZP: {self.c_zp}")
         for i in range(len(self.freqs)):
             # adjust parameters
             self.freqs[i].adjust_params()
@@ -89,10 +94,10 @@ class Dataset():
             self.freqs[i].assign_errors(N_eff,
                                         self.LC0.time[-1]-self.LC0.time[0],
                                         np.std(self.lcs[-1].data))
-        self.output_handler.post_pw(self.lcs, self.freqs)
+        self.output_handler.post_pw(self.lcs, self.freqs, self.c_zp)
 
     def total_model(self):
-        model = np.zeros(len(self.LC0.time))
+        model = np.zeros(len(self.LC0.time)) + self.c_zp
         for freq in self.freqs:
             model += freq.genmodel(self.LC0.time)
         return model

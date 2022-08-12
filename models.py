@@ -35,12 +35,12 @@ def sin_jacobian(x, cf, ca, cp, flag=None):
 
 def n_sin_model(x, *params):
     """params must be in format of *freqs, *amps, *phases"""
-    l = len(params)
+    l = len(params)-1
     nfreqs = len(params)//3
     y = np.zeros(len(x))
     for i in range(l // 3):
         y += sin_model(x, params[i], params[i+nfreqs], params[i+2*nfreqs])
-    return y
+    return y + params[-1]
 
 def n_sin_jacobian(x, *params, flag=None):
     """ returns jacobian of the n_sin model above. Can use flag to control the shape of the output for fixing params

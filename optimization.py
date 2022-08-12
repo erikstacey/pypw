@@ -6,6 +6,9 @@ import lmfit as lm
 import config
 from Freq import Freq
 
+def constant_function(x, z):
+    return z
+
 def sin_mod(x, f, a, p):
     return a*np.sin(2*np.pi*(f*x+p))
 
@@ -21,7 +24,8 @@ def sf_opt_lm(x, data, err, f0, a0, p0):
     #print(f_result.fit_report())
     return f_result.best_values["f"], f_result.best_values["a"], f_result.best_values["p"], f_result.best_fit
 
-def mf_opt_lm(x, data, err, freqs):
+
+def mf_opt_lm(x, data, err, freqs, zp):
     sf_mods = []
     for i in range(len(freqs)):
         freq = freqs[i]
@@ -32,9 +36,14 @@ def mf_opt_lm(x, data, err, freqs):
                              max=freq.a * config.amp_bounds_upper_coef)
         sfmod.set_param_hint(f"f{i}p", value=freq.p, min=config.phase_bounds_lower, max=config.phase_bounds_upper)
         sf_mods.append(sfmod)
+    zeroptmodel = lm.Model(constant_function, prefix="zp")
+    zeroptmodel.set_param_hint(f"zpz", value=zp)
+    if config.multi_fit_zp:
+        sf_mods.append(zeroptmodel)
     mf_mod = np.sum(sf_mods)
     f_result = mf_mod.fit(data=data, weights = err, x=x)
     #print(f_result.fit_report())
+
     for i in range(len(freqs)):
         # check boundaries
         c_sfmod = sf_mods[i]
@@ -46,10 +55,9 @@ def mf_opt_lm(x, data, err, freqs):
         freqs[i].f = f_result.best_values[f"f{i}f"]
         freqs[i].a = f_result.best_values[f"f{i}a"]
         freqs[i].p = f_result.best_values[f"f{i}p"]
-
-
-
-    return f_result.best_fit
+    if config.multi_fit_zp:
+        print(f"MF ZP: {f_result.best_values['zpz']}")
+    return f_result.best_fit, f_result.best_values["zpz"]
 
 
 

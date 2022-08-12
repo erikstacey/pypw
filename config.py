@@ -9,29 +9,37 @@ to False.
 4) Run main.py
 """
 # ========== Main/Most relevant ==========
-dataset_to_use = "corot"
 
 
 version = "2.0"
 
-working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_analysis_for_thesis/pdc"
+#working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_analysis_for_thesis/corot"
+#target_file = "corot_data_extracted.txt"
+working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_analysis_for_thesis/pdc_lowthreshold"
 target_file = "HD47129_thresh9_lc.txt"
+#working_dir = "C:/Users/Erik/main/projects/plaskett_photometry/hd47129_analysis_for_thesis/sap"
+#target_file = "HD47129_thresh9_lc_sap.txt"
 cols = [0, 1, 2]
 dtype = "flux"
 delimiter = ' '
-time_offset = -7000
+skiprows = 0
+time_offset = 1468.27
+file_time_offset = 2450000
+jd0 = file_time_offset+time_offset
 time_unit = "BJD"
 
 n_f = 50  # number of frequencies to extract
 
 peak_selection = "slf" # can be highest, bin, slf
-bin_highest_override = 10 # sets the number of frequencies
+bin_highest_override = 15 # sets the number of frequencies
 averaging_bin_radius = 0.5
 cutoff_iteration = 50
 cutoff_sig = 3.0
+multi_fit_zp = True
+prevent_frequencies_within_resolution = True
 
 multi_fit_type = "lm"  # "anneal", "lm", "scipy". Sets fitting engine to use.
-residual_model_generation = "sf" # can be sf, mf. Controls which model is used to generate residual periodogram
+residual_model_generation = "mf" # can be sf, mf. Controls which model is used to generate residual periodogram
 boundary_warnings = 0.05
 clean_existing = True
 
@@ -55,7 +63,7 @@ lcs_output = "lightcurves"
 pgs_output = "periodograms"
 misc_output = "supplemental"
 
-lc_xlabel = f"Time {time_unit}"
+lc_xlabel = f"Time [{time_unit} - {jd0}]"
 pg_xlabel = "Frequency [c/d]"
 if output_in_mmag:
     lc_ylabel = f"Flux [mmag]"

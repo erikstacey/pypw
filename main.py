@@ -58,18 +58,50 @@ def gen_flists_from_objlist_full(freqs):
         slist.append(freqs[i].sig)
     return flist, alist, plist, slist
 
+
+pl.rcParams['figure.figsize'] = [5, 3.5]
+pl.rcParams['figure.dpi'] = 300
+
+pl.rcParams['font.family'] = ['serif'] # default is sans-serif
+pl.rcParams['font.serif'] = [
+           'Times New Roman',
+           'Times',
+           'Bitstream Vera Serif',
+           'DejaVu Serif',
+           'New Century Schoolbook',
+           'Century Schoolbook L',
+           'Utopia',
+           'ITC Bookman',
+           'Bookman',
+           'Nimbus Roman No9 L',
+           'Palatino',
+           'Charter',
+           'serif']
+
+font = {'family' : 'Times New Roman',
+        'weight' : 'normal',
+        'size'   : 11}
+
+pl.rc('font', **font)
+
 def main():
     # todo: use low snr cutoff and high iteration cutoff to extract lots of frequencies. Then assess them individually.
     save_config("configlog.txt")
     os.chdir(config.working_dir)
     if len(config.cols) == 3:
-        imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True, delimiter = config.delimiter)
+        imptime, impdata, imperr = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True, delimiter = config.delimiter,
+                                              skiprows=config.skiprows)
+
     elif len(config.cols) == 2:
         imptime, impdata = np.loadtxt(fname=config.target_file, usecols=config.cols, unpack=True,
-                                              delimiter=config.delimiter)
+                                              delimiter=config.delimiter,
+                                      skiprows=config.skiprows)
         imperr = np.ones(len(imptime))
-    pptime, ppdata, pperr, ref_flux = preprocess(imptime-config.time_offset, impdata, imperr)
+    imptime += config.file_time_offset
+    pptime, ppdata, pperr, ref_flux = preprocess(imptime-config.jd0, impdata, imperr)
     print(f"Reference flux set to: {ref_flux}")
+    print(f"JD0 = {config.jd0}")
+    print(f"Midpoint: {(pptime[-1]-pptime[0])/2}")
     pl.plot(pptime, ppdata, color='black', marker='.', markersize=0.5, linestyle=None)
     pl.xlabel("Time [HJD]")
     pl.ylabel(f"Amplitude [{config.target_dtype}]")
