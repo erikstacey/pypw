@@ -1,9 +1,6 @@
-from models import sin_model, sin_jacobian, n_sin_model, n_sin_jacobian, n_sin_min
-from scipy.optimize import curve_fit, dual_annealing
 import numpy as np
-import matplotlib.pyplot as pl
 import lmfit as lm
-import config
+from config import config
 from Freq import Freq
 
 def constant_function(x, z):
@@ -13,6 +10,7 @@ def sin_mod(x, f, a, p):
     return a*np.sin(2*np.pi*(f*x+p))
 
 def sf_opt_lm(x, data, err, f0, a0, p0):
+    """Optimize a single-frequency sinusoidal model using lmfit"""
     sfmod = lm.Model(sin_mod)
     sfmod.set_param_hint("f", value=f0, min=f0*config.freq_bounds_lower_coef, max = f0*config.freq_bounds_upper_coef)
     sfmod.set_param_hint("a", value=a0, min=a0 * config.amp_bounds_lower_coef, max=a0 * config.amp_bounds_upper_coef)
@@ -26,6 +24,15 @@ def sf_opt_lm(x, data, err, f0, a0, p0):
 
 
 def mf_opt_lm(x, data, err, freqs, zp):
+    """
+    Optimize a multi-frequency model (complete variability model) using LMFit
+    :param x: The time axis of the original light curve
+    :param data: The data axis of the original light curve
+    :param err: The uncertainties on the data of the original light curve
+    :param freqs: A list of Freq objects passed by reference. These will be updated in-place.
+    :param zp: The floating-mean zp from the previous multi-frequency optimization
+    :return: A best-fit model evaluated at the input x values, a new optimized floating-mean zp
+    """
     sf_mods = []
     for i in range(len(freqs)):
         freq = freqs[i]
@@ -45,13 +52,18 @@ def mf_opt_lm(x, data, err, freqs, zp):
     #print(f_result.fit_report())
 
     for i in range(len(freqs)):
-        # check boundaries
+        # check boundaries - If any parameters are suspiciously close to a boundary, warn the user
         c_sfmod = sf_mods[i]
         for ptype in ["f", "a", "p"]:
-            if abs(c_sfmod.param_hints[ptype]["min"]-f_result.best_values[f"f{i}{ptype}"]) < config.boundary_warnings * f_result.best_values[f"f{i}{ptype}"]:
-                print(f"\t\t WARNING: {ptype} {f_result.best_values[f'f{i}{ptype}']} of f{i} within {config.boundary_warnings*100}% of lower boundary {c_sfmod.param_hints[ptype]['min']}")
-            elif abs(c_sfmod.param_hints[ptype]["max"]-f_result.best_values[f"f{i}{ptype}"]) < config.boundary_warnings * f_result.best_values[f"f{i}{ptype}"]:
-                print(f"\t\t WARNING: {ptype} {f_result.best_values[f'f{i}{ptype}']} of f{i} within {config.boundary_warnings*100}% of upper boundary {c_sfmod.param_hints[ptype]['max']}")
+            if abs(c_sfmod.param_hints[ptype]["min"]-f_result.best_values[f"f{i}{ptype}"]) \
+                    < config.boundary_warnings * f_result.best_values[f"f{i}{ptype}"]:
+                print(f"\t\t WARNING: {ptype} {f_result.best_values[f'f{i}{ptype}']} of f{i} within"
+                      f" {config.boundary_warnings*100}% of lower boundary {c_sfmod.param_hints[ptype]['min']}")
+            elif abs(c_sfmod.param_hints[ptype]["max"]-f_result.best_values[f"f{i}{ptype}"]) <\
+                    config.boundary_warnings * f_result.best_values[f"f{i}{ptype}"]:
+                print(f"\t\t WARNING: {ptype} {f_result.best_values[f'f{i}{ptype}']} of f{i}"
+                      f" within {config.boundary_warnings*100}% of upper boundary {c_sfmod.param_hints[ptype]['max']}")
+        # update the frequencies in-place
         freqs[i].f = f_result.best_values[f"f{i}f"]
         freqs[i].a = f_result.best_values[f"f{i}a"]
         freqs[i].p = f_result.best_values[f"f{i}p"]

@@ -1,6 +1,4 @@
 import numpy as np
-from scipy.optimize import curve_fit
-import matplotlib.pyplot as pl
 
 def flux2mag(data, ref):
         return -2.5*(np.log10(data+ref) -np.log10(ref))
@@ -34,7 +32,8 @@ def sin_jacobian(x, cf, ca, cp, flag=None):
 
 
 def n_sin_model(x, *params):
-    """params must be in format of *freqs, *amps, *phases"""
+    """A model containing an arbitrary number of sinusoidal components, determined by the length of the input parameters
+    params must be in format of *freqs, *amps, *phases, zp"""
     l = len(params)-1
     nfreqs = len(params)//3
     y = np.zeros(len(x))
@@ -64,6 +63,7 @@ def n_sin_jacobian(x, *params, flag=None):
         return jacobian
 
 def n_model_poly(x, *params):
+    """A polynomial model of arbitrary order, determined by the number of input parameters"""
     power = 0
     try:
         out = np.zeros(len(x))
@@ -75,13 +75,13 @@ def n_model_poly(x, *params):
     return out
 
 def n_sin_min(x, y, err, *params):
+    """A sinusoidal model wrapper for a minimizer"""
     model = n_sin_model(x, *params)
     dof = len(x)-len(params)
     return chisq(y, model, err)/dof
 
 def bowman_noise_model(x, *params):
+    """The model presented in Bowman et al. (2019) describing stochastic low-frequency variability in massive stars"""
     # params = [x0, alpha_0, gamma, Cw]
     return params[1] / (1+(x/params[0])**params[2]) + params[3]
 
-if __name__ == "__main__":
-    x = np.linspace(0,30, 10000)

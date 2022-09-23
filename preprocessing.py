@@ -1,5 +1,5 @@
 import numpy as np
-import config
+from config import config
 import matplotlib.pyplot as pl
 
 
@@ -10,7 +10,15 @@ def flux_to_mag_e(data, err):
 
 
 def stripgaps(time_in, data_in, err_in, gapsize, points):
-    """Removes points from around gaps in time of gapsize from a time, data, err dataset"""
+    """
+    Removes points from around gaps of a specified size in the time axis of a time series.
+    :param time_in: The time axis of a light curve
+    :param data_in: The data axis of a light curve
+    :param err_in: The uncertainties on the input light curve
+    :param gapsize: The minimum continuous gap size to remove points around
+    :param points: The number of points to remove on either side of each gap
+    :return: time, data, err: The input light curve with points removed around gaps
+    """
     # remove points around start and end
     time, data, err = time_in[points:-points], data_in[points:-points], err_in[points:-points]
     array_mask = np.ones(len(time), dtype=bool)
@@ -32,6 +40,15 @@ def stripgaps(time_in, data_in, err_in, gapsize, points):
 
 
 def preprocess(time0, data0, err0):
+    """
+    Convert a lightcurve to the config-specified datatype, strip points from around gaps if requested in config,
+    and convert to a differential light curve
+    :param time0: Input light curve time axis
+    :param data0: Input light curve data axis
+    :param err0: Input light curve uncertainties
+    :return time, data, err, reference flux: The pre-processed light curve, and the mean subtracted to convert it
+    to a differential LC
+    """
     time, data, err = time0, data0, err0
     if config.strip_gaps:
         time, data, err = stripgaps(time, data, err, config.gap_size, config.strip_gaps_points)

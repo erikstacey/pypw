@@ -1,4 +1,4 @@
-import config
+from config import config
 from datetime import datetime
 
 def save_csv_flist(filename, freqs, amps, phases, ferr, aerr, perr, sig):

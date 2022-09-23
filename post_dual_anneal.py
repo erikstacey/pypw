@@ -1,6 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as pl
-import config
+from config import config
 from optimization import fit_multi_annealing
 from pw_io import save_csv_flist
 import time as t
