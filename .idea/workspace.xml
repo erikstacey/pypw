@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8834f203-14b7-4544-94e6-e48be7f580f0" name="Changes" comment="Updated Doc" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/config.py" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="IgnoredFileRootStore">
+    <option name="generatedRoots">
+      <set>
+        <option value="$PROJECT_DIR$/.idea" />
+      </set>
+    </option>
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2DJYXNDmvVVEbgbqPamnueBwhGB" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable" />
+  </component>
+  <component name="RunManager">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="pypw" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.main" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" BundledDictionaries="0" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" Dictionaries="0" CorrectionsLimit="5" DefaultDictionary="application-level" UseSingleDictionary="true" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8834f203-14b7-4544-94e6-e48be7f580f0" name="Changes" comment="" />
+      <created>1660418693510</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1660418693510</updated>
+      <workItem from="1660418699408" duration="3349000" />
+      <workItem from="1660423002063" duration="1291000" />
+      <workItem from="1660510856163" duration="619000" />
+      <workItem from="1662404012574" duration="424000" />
+      <workItem from="1662494381679" duration="2114000" />
+      <workItem from="1663114888876" duration="6623000" />
+      <workItem from="1663203558509" duration="861000" />
+      <workItem from="1663296201755" duration="13000" />
+      <workItem from="1663296390757" duration="44000" />
+      <workItem from="1663296769085" duration="499000" />
+      <workItem from="1663364842605" duration="424000" />
+      <workItem from="1663531864152" duration="15124000" />
+      <workItem from="1663803946127" duration="333000" />
+      <workItem from="1663814058826" duration="573000" />
+      <workItem from="1663878519932" duration="143000" />
+      <workItem from="1663899687084" duration="471000" />
+      <workItem from="1663978553920" duration="253000" />
+    </task>
+    <task id="LOCAL-00001" summary="Updated Doc">
+      <created>1663899701021</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1663899701021</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Updated Doc" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated Doc" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="370" y="193" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1662771866319">
+      <screen x="0" y="23" width="1792" height="1017" />
+    </state>
+    <state x="370" y="193" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1792.1017@0.23.1792.1017" timestamp="1662771866319" />
+    <state x="513" y="134" key="CommitChangelistDialog2" timestamp="1663899700573">
+      <screen x="0" y="23" width="1792" height="1017" />
+    </state>
+    <state x="513" y="134" key="CommitChangelistDialog2/0.23.1792.1017@0.23.1792.1017" timestamp="1663899700573" />
+    <state width="1750" height="207" key="GridCell.Tab.0.bottom" timestamp="1663818322385">
+      <screen x="0" y="23" width="1792" height="1017" />
+    </state>
+    <state width="1750" height="207" key="GridCell.Tab.0.bottom/0.23.1792.1017@0.23.1792.1017" timestamp="1663818322385" />
+    <state width="1750" height="207" key="GridCell.Tab.0.center" timestamp="1663818322385">
+      <screen x="0" y="23" width="1792" height="1017" />
+    </state>
+    <state width="1750" height="207" key="GridCell.Tab.0.center/0.23.1792.1017@0.23.1792.1017" timestamp="1663818322385" />
+    <state width="1750" height="207" key="GridCell.Tab.0.left" timestamp="1663818322384">
+      <screen x="0" y="23" width="1792" height="1017" />
+    </state>
+    <state width="1750" height="207" key="GridCell.Tab.0.left/0.23.1792.1017@0.23.1792.1017" timestamp="1663818322384" />
+    <state width="1750" height="207" key="GridCell.Tab.0.right" timestamp="1663818322385">
+      <screen x="0" y="23" width="1792" height="1017" />
+    </state>
+    <state width="1750" height="207" key="GridCell.Tab.0.right/0.23.1792.1017@0.23.1792.1017" timestamp="1663818322385" />
+    <state x="407" y="170" key="SettingsEditor" timestamp="1663615220577">
+      <screen x="0" y="23" width="1792" height="1017" />
+    </state>
+    <state x="407" y="170" key="SettingsEditor/0.23.1792.1017@0.23.1792.1017" timestamp="1663615220577" />
+    <state x="496" y="260" key="Vcs.Push.Dialog.v2" timestamp="1663899703238">
+      <screen x="0" y="23" width="1792" height="1017" />
+    </state>
+    <state x="496" y="260" key="Vcs.Push.Dialog.v2/0.23.1792.1017@0.23.1792.1017" timestamp="1663899703238" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/pypw$config.coverage" NAME="config Coverage Results" MODIFIED="1660419496302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pypw$main.coverage" NAME="main Coverage Results" MODIFIED="1663814306816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
